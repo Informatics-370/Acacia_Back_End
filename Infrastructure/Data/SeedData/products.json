@@ -1,0 +1,164 @@
+[
+  {
+    "Id": 1,
+    "Name": "Retro 51 Tornado Pen",
+    "Description": "ERP Rescue Pen - Easy Flow Parker-Style Ballpoint Refill. Capless retractable ballpoint ink refill. Measures 3.8 inches in length and 0.2 inches in diameter.",
+    "PictureUrl": "images/products/ERP_Stationery_1.png",
+    "ProductTypeId": 1,
+    "SupplierId": 1,
+    "ProductCategoryId": 1
+  },
+  {
+    "Id": 2,
+    "Name": "Rhodia Reverso Notebook",
+    "Description": "The ERP Rhodia Reverso Notebook is a versatile square book and can be used with the spiral on the top or on either side. Each book contains 80 grid ruled pages. This classic look is the hallmark of these wire bound notebooks. Each book contains 80 micro-perforated sheets of extra-white, 20 lb bond paper with a smooth, satin finish. Their snag-proof double-wire binding is attached to coated, waterproof card covers.",
+    "PictureUrl": "images/products/ERP_Stationery_2.png",
+    "ProductTypeId": 1,
+    "SupplierId":  2,
+    "ProductCategoryId": 1
+  },
+  {
+    "Id": 3,
+    "Name": "Big Elephant",
+    "Description": "Clive Walker is one of the best known conservationists in Southern Africa. He founded the Endangered Wildlife Trust which today runs over 90 projects, protecting threatened species and ecosystems throughout the subcontinent. The Trust runs wilderness trails and other education programs and is credited, in particular, with helping to save the Black Rhino from extinction.",
+    "PictureUrl": "images/products/ERP_Art_1.png",
+    "ProductTypeId": 2,
+    "SupplierId": 2,
+    "ProductCategoryId": 2
+  },
+  {
+    "Id": 4,
+    "Name": "Rhino Pair",
+    "Description": "Clive Walker is one of the best known conservationists in Southern Africa. He founded the Endangered Wildlife Trust which today runs over 90 projects, protecting threatened species and ecosystems throughout the subcontinent. The Trust runs wilderness trails and other education programs and is credited, in particular, with helping to save the Black Rhino from extinction.",
+    "PictureUrl": "images/products/ERP_Art_2.png",
+    "ProductTypeId": 2,
+    "SupplierId": 1,
+    "ProductCategoryId": 2
+  },
+  {
+    "Id": 5,
+    "Name": "Shweshwe Cooler Tote",
+    "Description": "Bush Whisper bespoke SHWE SHWE custom made cooler tote. This lunch bag is perfect for everyday use,  a trip to the beach or a park picknick. Celebrate Southern Africans heritage with a traditional ShweShwe print inspired by Elements of Africa: Earth, Water, Air, and Fire.",
+    "PictureUrl": "images/products/ERP_Bags_1.png",
+    "ProductTypeId": 3,
+    "SupplierId": 1,
+    "ProductCategoryId": 4
+  },
+  {
+    "Id": 6,
+    "Name": "V-Flexfit Cotton Cap",
+    "Description": "Flexfit blends the strength of polyester, the breathability of cotton, and the stretch of spandex to provide unmatched comfort and durability. From big and tall to extra small, the moisture absorbent spandex sweatband will fit any head size and is engineered to keep you cool.",
+    "PictureUrl": "images/products/ERP_Hat_1.png",
+    "ProductTypeId": 4,
+    "SupplierId": 3,
+    "ProductCategoryId": 5
+  },
+  {
+    "Id": 7,
+    "Name": "Big 5 Wild Life, Rhino",
+    "Description": "Clive Walker is one of the best known conservationists in Southern Africa. He founded the Endangered Wildlife Trust which today runs over 90 projects, protecting threatened species and ecosystems throughout the subcontinent. The Trust runs wilderness trails and other education programs and is credited, in particular, with helping to save the Black Rhino from extinction.",
+    "PictureUrl": "images/products/ERP_Art_3.png",
+    "ProductTypeId": 2,
+    "SupplierId": 1,
+    "ProductCategoryId": 2
+  },
+  {
+    "Id": 8,
+    "Name": "Denim/Twill Waxed Bag",
+    "Description": "Our Roll Top backpack is a roomy, comfortable, stripped-down version made from stout, closely woven waxed twill perfect for keeping your belongings dry and safe in any conditions. Slightly larger than our Rucksack, the Roll Top is great for cyclists, motorcyclists, and anyone else who regularly faces the elements. ",
+    "PictureUrl": "images/products/ERP_Bags_2.png",
+    "ProductTypeId": 3,
+    "SupplierId": 1,
+    "ProductCategoryId": 4
+  },
+  {
+    "Id": 9,
+    "Name": "Insulated Cooler Backpack",
+    "Description": "Our Roll Top backpack is a roomy, comfortable, stripped-down version made from stout, closely woven waxed twill perfect for keeping your belongings dry and safe in any conditions. Slightly larger than our Rucksack, the Roll Top is great for cyclists, motorcyclists, and anyone else who regularly faces the elements. ",
+    "PictureUrl": "images/products/ERP_Bags_3.png",
+    "ProductTypeId": 3,
+    "SupplierId": 3,
+    "ProductCategoryId": 4
+  },
+  {
+    "Id": 10,
+    "Name": "Office Gift Box",
+    "Description": "Need a gift for that special someone or special occasion? Let our ERP Mercantile Gift Concierge help you develop and plan the perfect gift box. All of our gifts are sourced form Africa and the US, the bespoke (and exclusive) gifting world, packed and wrapped by hand, with love. This Gift box includes: ERP Elephant Organizer; Retro 51 Pen from the ERP Rescue Series; Colored Graphite Plantable Sprout Pencils pack of 5; ERP Honey 1.5 oz jar with dipper from the Elephant and Human Conflict project; ERP Rhodiarama Hard Cover Webbook A6;Concierge Gift wrapping service with 5*7 notecard",
+    "PictureUrl": "images/products/ERP_GiftBox_1.png",
+    "ProductTypeId": 3,
+    "SupplierId": 2,
+    "ProductCategoryId": 3
+  },
+  {
+    "Id": 11,
+    "Name": "ERP Stationary and Sock Gift Box",
+    "Description": "Need a gift for that special someone or special occasion? Let our ERP Mercantile Gift Concierge help you develop and plan the perfect gift box. All of our gifts are sourced form Africa and the US, the bespoke (and exclusive) gifting world, packed and wrapped by hand, with love. This Gift box includes: Retro 51 Tornado ERP Rescue Pen; Custom branded Rhodia Desk Webnotebooks, 96; ERP custom designed crew socks; Concierge Gift wrapping service with 5*7 notecard",
+    "PictureUrl": "images/products/ERP_GiftBox_2.png",
+    "ProductTypeId": 3,
+    "SupplierId": 2,
+    "ProductCategoryId": 3
+  },
+  {
+    "Id": 12,
+    "Name": "Command Laptop Bag",
+    "Description": "Timbuk2 is a San Francisco original, founded 25 years ago by bike messenger Rob Honeycutt in a garage in the city's Mission District.",
+    "PictureUrl": "images/products/ERP_Bags_4.png",
+    "ProductTypeId": 3,
+    "SupplierId": 1,
+    "ProductCategoryId": 4
+  },
+  {
+    "Id": 13,
+    "Name": "TIMBUK2 Crossbody Bag",
+    "Description": "Timbuk2 is a San Francisco original, founded 25 years ago by bike messenger Rob Honeycutt in a garage in the city's Mission District.",
+    "PictureUrl": "images/products/ERP_Bags_5.png",
+    "ProductTypeId": 3,
+    "SupplierId": 1,
+    "ProductCategoryId": 4
+  },
+  {
+    "Id": 14,
+    "Name": "Jaeger-LeCoultre Grande",
+    "Description": "A single movement integrated into an ultra-thin steel case drives these two dials. All original parts unpolished case, comes with original box and instructions, original black leather strap and original buckle ",
+    "PictureUrl": "images/products/ERP_Watch_1.png",
+    "ProductTypeId": 4,
+    "SupplierId": 1,
+    "ProductCategoryId": 6
+  },
+  {
+    "Id": 15,
+    "Name": "Big 5 Wild Life, Elephant",
+    "Description": "Clive Walker is one of the best known conservationists in Southern Africa. He founded the Endangered Wildlife Trust which today runs over 90 projects, protecting threatened species and ecosystems throughout the subcontinent. The Trust runs wilderness trails and other education programs and is credited, in particular, with helping to save the Black Rhino from extinction.",
+    "PictureUrl": "images/products/ERP_Art_4.png",
+    "ProductTypeId": 2,
+    "SupplierId": 1,
+    "ProductCategoryId": 2
+  },
+  {
+    "Id": 16,
+    "Name": "Small Elephant, Big Tree",
+    "Description": "Clive Walker is one of the best known conservationists in Southern Africa. He founded the Endangered Wildlife Trust which today runs over 90 projects, protecting threatened species and ecosystems throughout the subcontinent. The Trust runs wilderness trails and other education programs and is credited, in particular, with helping to save the Black Rhino from extinction.",
+    "PictureUrl": "images/products/ERP_Art_5.png",
+    "ProductTypeId": 2,
+    "SupplierId": 1,
+    "ProductCategoryId": 2
+  },
+  {
+    "Id": 17,
+    "Name": "Elephant Organizer",
+    "Description": "ERP Custom made wooden elephant cell phone holder/stand with stationary organiser.",
+    "PictureUrl": "images/products/ERP_Stationery_3.png",
+    "ProductTypeId": 1,
+    "SupplierId": 3,
+    "ProductCategoryId": 1
+  },
+  {
+    "Id": 18,
+    "Name": "RETRAKT Pen",
+    "Description": "The RETRAKT is a pen body made in the USA from high-quality materials, such as aluminum, brass, or copper. It has a durable click mechanism made in Germany by Schmidt, which should not be aggressively clicked to avoid damage. It can be used with popular refills such as the Pilot G2 or Parker ballpoint. Replacement parts are available, but not covered by warranty.",
+    "PictureUrl": "images/products/ERP_Stationery_4.png",
+    "ProductTypeId": 1,
+    "SupplierId": 3,
+    "ProductCategoryId": 1
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "Id": 1,
+    "Name": "Gucci",
+    "Email": "gucci@gmail.com",
+    "PhoneNumber": 799912889
+  },
+  {
+    "Id": 2,
+    "Name": "Balenciaga",
+    "Email": "balenciaga@gmail.com",
+    "PhoneNumber": 799912889
+  },
+  {
+    "Id": 3,
+    "Name": "YourMom",
+    "Email": "momma@gmail.com",
+    "PhoneNumber": 799912889
+  }
+]
