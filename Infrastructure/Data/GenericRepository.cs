@@ -120,10 +120,22 @@ namespace Acacia_Back_End.Infrastructure.Data
                 switch (pageParams.sort)
                 {
                 case "priceAsc":
-                    result = result.OrderBy(p => p.PriceHistory.OrderByDescending(pp => pp.StartDate).First().Price).ToList();
+                    result = result.OrderBy(p => p.GetPrice()).ToList();
                     break;
                 case "priceDesc":
-                    result = result.OrderByDescending(p => p.PriceHistory.OrderByDescending(pp => pp.StartDate).First().Price).ToList();
+                    result = result.OrderByDescending(p => p.GetPrice()).ToList();
+                    break;
+                case "quantityAsc":
+                    result = result.OrderBy(p => p.Quantity).ToList();
+                    break;
+                case "quantityDesc":
+                    result = result.OrderByDescending(p => p.Quantity).ToList();
+                    break;
+                case "thresholdAsc":
+                    result = result.OrderBy(p => p.TresholdValue).ToList();
+                    break;
+                case "thresholdDesc":
+                    result = result.OrderByDescending(p => p.TresholdValue).ToList();
                     break;
                 default:
                     result = result.OrderBy(n => n.Name).ToList();

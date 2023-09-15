@@ -294,6 +294,18 @@ namespace Acacia_Back_End.Infrastructure.Services
                 case "nameDesc":
                     products = products.OrderByDescending(p => p.Name).ToList();
                     break;
+                case "quantityAsc":
+                    products = products.OrderBy(p => p.Quantity).ToList();
+                    break;
+                case "quantityDesc":
+                    products = products.OrderByDescending(p => p.Quantity).ToList();
+                    break;
+                case "thresholdAsc":
+                    products = products.OrderBy(p => p.TresholdValue).ToList();
+                    break;
+                case "thresholdDesc":
+                    products = products.OrderByDescending(p => p.TresholdValue).ToList();
+                    break;
                 default:
                     products = products.OrderBy(n => n.Name).ToList();
                     break;
