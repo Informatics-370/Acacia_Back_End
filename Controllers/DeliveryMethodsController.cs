@@ -65,16 +65,16 @@ namespace Acacia_Back_End.Controllers
             deliveryMethod.Name = newDeliverymethod.Name;
             deliveryMethod.Description = newDeliverymethod.Description;
 
-            var result = await _deliveryRepo.UpdateEntity(deliveryMethod);
-            if(result == false) return BadRequest(new ApiResponse(400));
+            var result = await _deliveryRepo.UpdateDeliveryMethod(deliveryMethod);
+            if(result == false) return BadRequest(new ApiResponse(400, "There was a problem updating the deliveryMethod. Please check for any associations before deleting."));
             return Ok(deliveryMethod);
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteDeliveryMethod(int id)
         {
-            var result = await _deliveryRepo.RemoveEntity(id);
-            if (result == false) return BadRequest(new ApiResponse(400));
+            var result = await _deliveryRepo.RemoveDeliveryMethod(id);
+            if (result == false) return BadRequest(new ApiResponse(400, "There was a problem deleting the deliveryMethod. Please check for any associations before deleting."));
             return Ok();
         }
     }

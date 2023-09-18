@@ -5,8 +5,10 @@ using Acacia_Back_End.Core.Models.Identities;
 using Acacia_Back_End.Core.Specifications;
 using Acacia_Back_End.Core.ViewModels;
 using Acacia_Back_End.Errors;
+using Acacia_Back_End.Extensions;
 using Acacia_Back_End.Helpers;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -46,6 +48,7 @@ namespace Acacia_Back_End.Controllers
             return Ok(_mapper.Map<WriteOffVM>(writeOff));
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult> CreateWriteoff(CreateWriteOffVM writeOffVM)
         {
@@ -78,6 +81,7 @@ namespace Acacia_Back_End.Controllers
 
             var result = await _writeoffRepo.CreateWriteOff(new WriteOff
             {
+                ManagerEmail = HttpContext.User.RetrieveEmailFromPrincipal(),
                 Date = DateTime.Now,
                 ProductId = writeOffVM.ProductId,
                 Quantity = writeOffVM.Quantity,

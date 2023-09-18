@@ -28,7 +28,7 @@
         public int OrderTypeId { get; set; }
         public OrderType OrderType { get; set; }
         public string PaymentIntentId { get; set; }
-
+        //public Vat VAT { get; set; }
         public decimal GetTotal()
         {
             if(GroupElephantDiscount != 0)

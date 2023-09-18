@@ -15,5 +15,8 @@ namespace Acacia_Back_End.Core.ViewModels
 
         [EnumMember(Value = "Supplier Return")]
         SupplierReturn,
+
+        [EnumMember(Value = "Write Off")]
+        WriteOff,
     }
 }

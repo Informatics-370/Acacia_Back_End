@@ -8,7 +8,7 @@ namespace Acacia_Back_End.Core.Models.SupplierOrders
         {
         }
 
-        public SupplierOrder(IReadOnlyList<SupplierOrderItem> orderItems, string managerEmail, Company companyDetails, Supplier supplier, decimal total)
+        public SupplierOrder(List<SupplierOrderItem> orderItems, string managerEmail, Company companyDetails, Supplier supplier, decimal total)
         {
             ManagerEmail = managerEmail;
             OrderItems = orderItems;
@@ -20,8 +20,9 @@ namespace Acacia_Back_End.Core.Models.SupplierOrders
         public string ManagerEmail { get; set; }
         public DateTime OrderDate { get; set; } = DateTime.Now;
         public SupplierOrderStatus Status { get; set; } = SupplierOrderStatus.Pending;
-        public IReadOnlyList<SupplierOrderItem> OrderItems { get; set; }
+        public List<SupplierOrderItem> OrderItems { get; set; }
         public decimal Total { get; set; }
+        public decimal TotalNotDelivered { get; set; } = 0;
         public string InvoiceUrl { get; set; }
         public string ProofOfPaymentUrl { get; set; }
         public Company CompanyDetails { get; set; }

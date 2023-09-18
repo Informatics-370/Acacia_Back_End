@@ -253,11 +253,11 @@ namespace Acacia_Back_End.Controllers
         {
             var user = await _userManager.FindUserByClaimsPrincipleWithAddress(HttpContext.User);
 
-            var result = await _userManager.DeleteAsync(user);
+            var result = await _userRepo.RemoveUser(user);
 
-            if (result.Succeeded) return Ok();
+            if (result == true) return Ok();
 
-            return BadRequest("There was a problem deleting the user");
+            return BadRequest(new ApiResponse(400, "There was a problem adding a deleting the user. Please check for any associations before deleting."));
         }
 
         [HttpGet("emailexists")]

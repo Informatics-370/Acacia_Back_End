@@ -93,6 +93,25 @@ namespace Acacia_Back_End.Infrastructure.Data
                         });
                     }
                     break;
+                case "Write Off":
+                    var writeOffsLog = await _context.WriteOffs
+                        .Include(x => x.Product)
+                        .ThenInclude(x => x.PriceHistory)
+                        .Where(x => (string.IsNullOrEmpty(searchParams.Search) || x.ManagerEmail.ToLower().Contains(searchParams.Search.ToLower())))
+                        .ToListAsync();
+
+                    foreach (var record in writeOffsLog)
+                    {
+                        auditTrail.Add(new AuditTrailVM
+                        {
+                            User = record.ManagerEmail,
+                            Type = AuditTypeVM.WriteOff.ToString(),
+                            Date = record.Date,
+                            Amount = record.Product.GetPrice() * record.Quantity,
+                            Quantity = record.Quantity,
+                        });
+                    }
+                    break;
                 default:
                     var saleOrder = await _context.Orders
                         .Include(x => x.OrderItems)
