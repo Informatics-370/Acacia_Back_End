@@ -78,10 +78,9 @@ namespace Acacia_Back_End.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteSupplier(int id)
         {
-            var result = await _supplierRepo.RemoveEntity(id);
+            var result = await _supplierRepo.RemoveSupplier(id);
 
-            if (result == false) return BadRequest(new ApiResponse(400));
-
+            if (result == false) return BadRequest(new ApiResponse(400, "There was a problem adding a deleting the supplier. Please check for any associations before deleting."));
             return Ok(result);
         }
     }

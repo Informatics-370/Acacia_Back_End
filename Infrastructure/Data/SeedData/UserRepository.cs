@@ -15,13 +15,15 @@ namespace Acacia_Back_End.Infrastructure.Data.SeedData
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IConfiguration _config;
+        private readonly Context _context;
 
-        public UserRepository(UserManager<AppUser> usermanager, RoleManager<IdentityRole> roleManager, SignInManager<AppUser> signInManager, IConfiguration config)
+        public UserRepository(UserManager<AppUser> usermanager, RoleManager<IdentityRole> roleManager, SignInManager<AppUser> signInManager, IConfiguration config, Context context)
         {
             _userManager = usermanager;
             _roleManager = roleManager;
             _signInManager = signInManager;
             _config = config;
+            _context = context;
         }
 
         public async Task<IReadOnlyList<UserVM>> GetUsersAsync(UserSpecParams userParams)
@@ -58,6 +60,34 @@ namespace Acacia_Back_End.Infrastructure.Data.SeedData
                 DisplayName = user.DisplayName,
                 ProfilePicture = _config["ApiUrl"] + "/" + user.ProfilePicture
             }).Select(t => t.Result).ToList();
+        }
+
+        public async Task<bool> RemoveUser(AppUser user)
+        {
+            var isInSaleOrder = await _context.Orders.Where(x => x.CustomerEmail == user.Email).FirstOrDefaultAsync();
+            var isInSupplierOrder = await _context.SupplierOrders.Where(x => x.ManagerEmail == user.Email).FirstOrDefaultAsync();
+            var isInSaleReturn = await _context.CustomerReturns.Where(x => x.CustomerEmail == user.Email).FirstOrDefaultAsync();
+            var isInSupplierReturn = await _context.SupplierReturns.Where(x => x.ManagerEmail == user.Email).FirstOrDefaultAsync();
+            var isInProductReview = await _context.ProductReviews.Where(x => x.CustomerEmail == user.Email).FirstOrDefaultAsync();
+            var isInWriteOff = await _context.WriteOffs.Where(x => x.ManagerEmail == user.Email).FirstOrDefaultAsync();
+            var Managers = await _userManager.GetUsersInRoleAsync("Manager");
+
+            if (isInSaleOrder != null || isInSupplierOrder != null || isInSaleReturn != null
+                || isInSupplierReturn != null || isInProductReview != null || isInWriteOff != null)
+            {
+                return false;
+            }
+            else if (Managers.Count() <= 1)
+            {
+                return false;
+            }
+            else
+            {
+                var result = await _userManager.DeleteAsync(user);
+                if (result.Succeeded) return true;
+                return false;
+
+            }
         }
 
         // Implement your functions defiened in the IUserRepository interface here

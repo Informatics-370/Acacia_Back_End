@@ -151,10 +151,9 @@ namespace Acacia_Back_End.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteGiftBox(int id)
         {
-            var result = await _giftBoxRepo.RemoveEntity(id);
-
-            if(result == true) return Ok(); 
-            return BadRequest(new ApiResponse(400));
+            var result = await _giftBoxRepo.RemoveGiftBox(id);
+            if(result == true) return Ok();
+            return BadRequest(new ApiResponse(400, "There was a problem adding a deleting the giftbox. Please check for any associations before deleting."));
         }
 
         private async Task<string> SaveGiftBoxImage(IFormFile file)

@@ -120,10 +120,22 @@ namespace Acacia_Back_End.Infrastructure.Data
                 switch (pageParams.sort)
                 {
                 case "priceAsc":
-                    result = result.OrderBy(p => p.PriceHistory.OrderByDescending(pp => pp.StartDate).First().Price).ToList();
+                    result = result.OrderBy(p => p.GetPrice()).ToList();
                     break;
                 case "priceDesc":
-                    result = result.OrderByDescending(p => p.PriceHistory.OrderByDescending(pp => pp.StartDate).First().Price).ToList();
+                    result = result.OrderByDescending(p => p.GetPrice()).ToList();
+                    break;
+                case "quantityAsc":
+                    result = result.OrderBy(p => p.Quantity).ToList();
+                    break;
+                case "quantityDesc":
+                    result = result.OrderByDescending(p => p.Quantity).ToList();
+                    break;
+                case "thresholdAsc":
+                    result = result.OrderBy(p => p.TresholdValue).ToList();
+                    break;
+                case "thresholdDesc":
+                    result = result.OrderByDescending(p => p.TresholdValue).ToList();
                     break;
                 default:
                     result = result.OrderBy(n => n.Name).ToList();
@@ -274,13 +286,6 @@ namespace Acacia_Back_End.Infrastructure.Data
             return promotions;
         }
 
-        public async Task<bool> RemovePromotion(int id)
-        {
-            var entity = await _context.Promotions.Where(x => x.Id == id).Include(x => x.Products).FirstOrDefaultAsync();
-            _context.Promotions.Remove(entity);
-            return await _context.SaveChangesAsync() > 0;
-        }
-
         public async Task<IReadOnlyList<Order>> GetUserOrdersAsync(string customerEmail, OrderParams searchParams)
         {
             var orders = await _context.Orders
@@ -394,6 +399,9 @@ namespace Acacia_Back_End.Infrastructure.Data
                 order.GroupElephantDiscount = 10;
             }
 
+            this.GetActiveVat();
+
+
             await _context.Orders.AddAsync(order);
 
             await _context.SaveChangesAsync();
@@ -481,6 +489,7 @@ namespace Acacia_Back_End.Infrastructure.Data
             var product = await _context.Products.Where(x => x.Id == wrtieoff.ProductId).Include(x => x.Supplier).Include(x => x.PriceHistory).FirstOrDefaultAsync();
             if (product.Quantity < wrtieoff.Quantity) return false;
             product.Quantity = product.Quantity - wrtieoff.Quantity;
+            wrtieoff.ProductPrice = product.GetPrice();
 
             var result1 = await _context.WriteOffs.AddAsync(wrtieoff);
             var result2 = _context.Products.Update(product);
@@ -810,36 +819,25 @@ namespace Acacia_Back_End.Infrastructure.Data
         {
             var order = await _context.SupplierOrders.Where(x => x.Id == orderId).Include(x => x.OrderItems).FirstOrDefaultAsync();
             if (order == null) return false;
-
-            var items = new List<SupplierOrderItem>();
             decimal total = 0;
+
+            foreach(var item in order.OrderItems)
+            {
+                    _context.SupplierOrderItems.Remove(item);
+            }
+            order.OrderItems.Clear();
 
             foreach (var item in orderItems)
             {
-                var result = order.OrderItems.Where(x => x.ItemOrdered.ProductItemId == item.ProductId).FirstOrDefault();
-                if (result != null && result.Quantity != item.Quantity)
+                var productItem = await this.GetProductByIdAsync(item.ProductId);
+                if (productItem.SupplierId == order.SupplierId)
                 {
-                    result.Quantity = item.Quantity;
-                    items.Add(result);
-                    total += result.Price * result.Quantity;
-                }
-                else
-                {
-                    var productItem = await this.GetProductByIdAsync(item.ProductId);
-                    if (productItem.SupplierId == order.SupplierId)
-                    {
-                        var productordered = new SupplierProductOrdered(productItem.Id, productItem.Name, productItem.PictureUrl);
-                        var orderItem = new SupplierOrderItem(productordered, productItem.PriceHistory.OrderByDescending(pp => pp.StartDate).First().Price, item.Quantity);
-                        items.Add(orderItem);
-                        total += orderItem.Price * orderItem.Quantity;
-                    }
+                    var productordered = new SupplierProductOrdered(productItem.Id, productItem.Name, productItem.PictureUrl);
+                    var orderItem = new SupplierOrderItem(productordered, productItem.PriceHistory.OrderByDescending(pp => pp.StartDate).First().Price, item.Quantity);
+                    order.OrderItems.Add(orderItem);
+                    total += orderItem.Price * orderItem.Quantity;
                 }
             }
-
-            // Maybe I will need to add a status for the supplier order items for which ones were delivered or not
-            // Then in this function I will just got to all of the items in here and update the status
-            // 
-            order.OrderItems = items;
             order.Total = total;
             order.Status = SupplierOrderStatus.EmailSent;
             _context.SupplierOrders.Update(order);
@@ -862,18 +860,25 @@ namespace Acacia_Back_End.Infrastructure.Data
         public async Task<bool> ConfirmSupplierOrderDelivery(int orderId, List<SupplierOrderItemVM> orderItems)
         {
             var order = _context.SupplierOrders.Where(x => x.Id == orderId).Include(x => x.OrderItems).FirstOrDefault();
+            order.TotalNotDelivered = 0;
             if (order == null) return false;
 
             foreach (var item in orderItems)
             {
                 var result = order.OrderItems.Where(x => x.ItemOrdered.ProductItemId == item.ProductId).FirstOrDefault();
-                if (result != null && result.Quantity != item.Quantity)
+                // The supplier has under delivered
+                if (result != null && result.Quantity > item.Quantity)
                 {
-                    order.OrderItems.Where(x => x.ItemOrdered.ProductItemId == item.ProductId).FirstOrDefault().Quantity = item.Quantity;
-                    var productItem = await this.GetProductByIdAsync(item.ProductId);
-                    productItem.Quantity += item.Quantity;
-                    _context.Products.Update(productItem);
+                    result.QuantityNotDelivered = result.Quantity - item.Quantity;
+                    order.TotalNotDelivered += result.QuantityNotDelivered * result.Price;
                 }
+                if(result != null && result.Quantity < item.Quantity)
+                {
+                    return false;
+                }
+                var productItem = await this.GetProductByIdAsync(item.ProductId);
+                productItem.Quantity += item.Quantity;
+                _context.Products.Update(productItem);
             }
             order.Status = SupplierOrderStatus.OrderRecieved;
             _context.SupplierOrders.Update(order);
@@ -948,7 +953,10 @@ namespace Acacia_Back_End.Infrastructure.Data
                     return false;
                 }
 
-                if (order.OrderItems.Where(x => x.ItemOrdered.ProductItemId == item.ProductId).FirstOrDefault() == null || order.OrderItems.Where(x => x.ItemOrdered.ProductItemId == item.ProductId).FirstOrDefault().Quantity < item.Quantity)
+                if (order.OrderItems.Where(x => x.ItemOrdered.ProductItemId == item.ProductId).FirstOrDefault() == null || 
+                    (order.OrderItems.Where(x => x.ItemOrdered.ProductItemId == item.ProductId).FirstOrDefault().Quantity -
+                    order.OrderItems.Where(x => x.ItemOrdered.ProductItemId == item.ProductId).FirstOrDefault().QuantityNotDelivered)
+                    < item.Quantity)
                 {
                     return false;
                 }
@@ -1045,6 +1053,138 @@ namespace Acacia_Back_End.Infrastructure.Data
                     break;
             }
             return MediaList;
+        }
+
+
+        public async Task<bool> RemoveProduct(int id)
+        {
+            var entity = await _context.Products.FindAsync(id);
+
+            var isInPromotion = await _context.Promotions.Where(x => x.Products.Contains(entity)).FirstOrDefaultAsync();
+            var isInGiftBox = await _context.GiftBoxes.Where(x => x.Products.Contains(entity)).FirstOrDefaultAsync();
+            var isInSaleOrder = await _context.OrderItems.Where(x => x.ItemOrdered.ProductItemId == id).FirstOrDefaultAsync();
+            var isInSupplierOrder = await _context.SupplierOrderItems.Where(x => x.ItemOrdered.ProductItemId == id).FirstOrDefaultAsync();
+            var isInSaleReturn = await _context.ReturnItems.Where(x => x.ProductId == id).FirstOrDefaultAsync();
+            var isInSupplierReturn = await _context.SupplierReturnItems.Where(x => x.ProductId == id).FirstOrDefaultAsync();
+            var isInWriteOff = await _context.WriteOffs.Where(x => x.ProductId == id).FirstOrDefaultAsync();
+            var isInProductReview = await _context.ProductReviews.Where(x => x.ProductId == id).FirstOrDefaultAsync();
+
+            if (isInPromotion != null || isInGiftBox != null || isInSaleOrder != null 
+                || isInSupplierOrder != null || isInSaleReturn != null 
+                || isInSupplierReturn != null || isInWriteOff != null || isInProductReview != null)
+            {
+                return false;
+            }
+            else
+            {
+                _context.Remove(entity);
+                return await _context.SaveChangesAsync() > 0;
+            }
+        }
+
+        public async Task<bool> RemoveProductType(int id)
+        {
+            var entity = await _context.ProductTypes.FindAsync(id);
+            var isInProduct = await _context.Products.Where(x => x.ProductTypeId == id).FirstOrDefaultAsync();  
+            if (isInProduct != null)
+            {
+                return false;
+            }
+            else
+            {
+                _context.ProductTypes.Remove(entity);
+                return await _context.SaveChangesAsync() > 0;
+            }
+        }
+
+        public async Task<bool> RemoveProductCategory(int id)
+        {
+            var entity = await _context.ProductCategories.FindAsync(id);
+            var isInProduct = await _context.Products.Where(x => x.ProductCategoryId == id).FirstOrDefaultAsync();
+            if (isInProduct != null)
+            {
+                return false;
+            }
+            else
+            {
+                _context.ProductCategories.Remove(entity);
+                return await _context.SaveChangesAsync() > 0;
+            }
+        }
+
+        public async Task<bool> RemoveSupplier(int id)
+        {
+            var entity = await _context.Suppliers.FindAsync(id);
+            var isInProduct = await _context.Products.Where(x => x.SupplierId == id).FirstOrDefaultAsync();
+            if (isInProduct != null)
+            {
+                return false;
+            }
+            else
+            {
+                _context.Suppliers.Remove(entity);
+                return await _context.SaveChangesAsync() > 0;
+            }
+        }
+
+        public async Task<bool> RemoveGiftBox(int id)
+        {
+            var entity = await _context.GiftBoxes.FindAsync(id);
+            var isInProduct = await _context.Products.Where(x => x.GiftBoxes.Contains(entity)).FirstOrDefaultAsync();
+            if (isInProduct != null)
+            {
+                return false;
+            }
+            else
+            {
+                _context.GiftBoxes.Remove(entity);
+                return await _context.SaveChangesAsync() > 0;
+            }
+        }
+
+        public async Task<bool> RemoveDeliveryMethod(int id)
+        {
+            var entity = await _context.DeliveryMethods.FindAsync(id);
+            var isInOrder = await _context.Orders.Where(x => x.DeliveryMethodId == id).FirstOrDefaultAsync();
+            if (isInOrder != null)
+            {
+                return false;
+            }
+            else
+            {
+                _context.DeliveryMethods.Remove(entity);
+                return await _context.SaveChangesAsync() > 0;
+            }
+        }
+
+        public async Task<bool> RemovePromotion(int id)
+        {
+            var entity = await _context.Promotions.FindAsync(id);
+            var isInProduct = await _context.Products.Where(x => x.PromotionId == id).FirstOrDefaultAsync();
+            var isInOrder = await _context.OrderItems.Where(x => x.ItemOrdered.PromotionId == id).FirstOrDefaultAsync();
+            if (isInProduct != null || isInOrder != null)
+            {
+                return false;
+            }
+            else
+            {
+                _context.Promotions.Remove(entity);
+                return await _context.SaveChangesAsync() > 0;
+            }
+        }
+
+        public async Task<bool> UpdateDeliveryMethod(DeliveryMethod deliveryMethod)
+        {
+            var isInOrder = await _context.Orders.Where(x => x.DeliveryMethodId == deliveryMethod.Id).FirstOrDefaultAsync();
+            if (isInOrder != null)
+            {
+                return false;
+            }
+            else
+            {
+                _context.DeliveryMethods.Update(deliveryMethod);
+                return await _context.SaveChangesAsync() > 0;
+            }
         }
     }
 }

@@ -195,11 +195,11 @@ namespace Acacia_Back_End.Controllers
         [Authorize]
         public async Task<ActionResult<ProductVM>> DeleteProduct(int id)
         {
-            var result = await _productsRepo.RemoveEntity(id);
+            var result = await _productsRepo.RemoveProduct(id);
 
             if (result == true) return Ok();
 
-            return BadRequest("There was a problem adding a deleting the product");
+            return BadRequest(new ApiResponse (400, "There was a problem adding a deleting the product. Please check for any associations before deleting."));
         }
 
 
@@ -230,11 +230,11 @@ namespace Acacia_Back_End.Controllers
         [Authorize]
         public async Task<ActionResult> DeleteProductCategory(int id)
         {
-            var result = await _productCategoryRepo.RemoveEntity(id);
+            var result = await _productCategoryRepo.RemoveProductCategory(id);
 
             if (result == true) return Ok();
 
-            return BadRequest(new ApiResponse(400, "There was a problem deleting the product category"));
+            return BadRequest(new ApiResponse(400, "There was a problem deleting the product category. Please check for any associations before deleting."));
         }
 
         [HttpPut("category/update/{id}")]
@@ -280,11 +280,11 @@ namespace Acacia_Back_End.Controllers
         [Authorize]
         public async Task<ActionResult> DeleteProductType(int id)
         {
-            var result = await _productTypeRepo.RemoveEntity(id);
+            var result = await _productTypeRepo.RemoveProductType(id);
 
             if (result == true) return Ok();
 
-            return BadRequest(new ApiResponse(400, "There was a problem deleting the product type"));
+            return BadRequest(new ApiResponse(400, "There was a problem deleting the product type. Please check for any associations before deleting."));
         }
 
         [HttpPut("type/update/{id}")]

@@ -8,6 +8,8 @@ namespace Acacia_Back_End.Core.Interfaces
     {
         Task<IReadOnlyList<UserVM>> GetUsersAsync(UserSpecParams userParams);
 
+        Task<bool> RemoveUser(AppUser user);
+
         // Define your Permission functions here (if necessary) then Implement them in the UserRepository.cs file
     }
 }

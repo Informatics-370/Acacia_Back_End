@@ -177,13 +177,14 @@ namespace Acacia_Back_End.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserVM>> Login(LoginVM loginvm)
         {
+
             var user = await _userManager.FindByEmailAsync(loginvm.Email);
 
             if (user == null) return Unauthorized(new ApiResponse(401));
 
-            var result = await _signInManager.CheckPasswordSignInAsync(user, loginvm.Password, false);
+            var result2 = await _signInManager.CheckPasswordSignInAsync(user, loginvm.Password, false);
 
-            if (!result.Succeeded) return Unauthorized(new ApiResponse(401));
+            if (!result2.Succeeded) return Unauthorized(new ApiResponse(401));
 
             var myuser = _mapper.Map<AppUser, UserVM>(user);
             myuser.Token = _tokenService.CreateToken(user);
@@ -191,6 +192,7 @@ namespace Acacia_Back_End.Controllers
 
             return Ok(myuser);
         }
+
 
         [Authorize]
         [HttpPut("update-user"), DisableRequestSizeLimit]
@@ -251,11 +253,11 @@ namespace Acacia_Back_End.Controllers
         {
             var user = await _userManager.FindUserByClaimsPrincipleWithAddress(HttpContext.User);
 
-            var result = await _userManager.DeleteAsync(user);
+            var result = await _userRepo.RemoveUser(user);
 
-            if (result.Succeeded) return Ok();
+            if (result == true) return Ok();
 
-            return BadRequest("There was a problem deleting the user");
+            return BadRequest(new ApiResponse(400, "There was a problem adding a deleting the user. Please check for any associations before deleting."));
         }
 
         [HttpGet("emailexists")]
@@ -294,11 +296,15 @@ namespace Acacia_Back_End.Controllers
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
+            var twoFactorToken = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 1);
+
+            if (twoFactorToken == null) return BadRequest(new ApiResponse(400));
+
             EmailVM forgotpassword = new EmailVM
             {
                 To = email,
-                Subject = "Password Reset - Acacia",
-                Body = "Hello, your password reset link is " + "http://localhost:4200/account/forgot-password?id=" + user.Id + "&token=" + token
+                Subject = "Two-Factor Authentication - Password Reset",
+                Body = "Hello, your password reset link is " + "http://localhost:4200/account/forgot-password?id=" + user.Id + "&token=" + token + " And the token is " + twoFactorToken.FirstOrDefault()
             };
 
             _emailservice.SendEmail(forgotpassword);
@@ -306,10 +312,38 @@ namespace Acacia_Back_End.Controllers
             return Ok();
         }
 
+        [HttpPost("resend-forgot-password-OTP")]
+        public async Task<ActionResult> resendForgotPasswordOTP(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null) return NotFound(new ApiResponse(404));
+
+            var twoFactorToken = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 1);
+
+            if (twoFactorToken == null) return BadRequest(new ApiResponse(400));
+
+            EmailVM forgotpassword = new EmailVM
+            {
+                To = user.Email,
+                Subject = "Two-Factor Authentication - Password Reset",
+                Body = "Hello, your OTP is " + twoFactorToken.FirstOrDefault()
+            };
+            _emailservice.SendEmail(forgotpassword);
+
+            return Ok();
+        }
+
         [HttpPost("reset-forgot-password")]
-        public async Task<ActionResult> resetForgottenPassword(ResetPasswordVM resetVM)
+        public async Task<ActionResult> resetForgottenPassword(ForgotPasswordVM resetVM)
         {
             var user = await _userManager.FindByIdAsync(resetVM.userid);
+
+            if (user == null) return NotFound(new ApiResponse(404, "User not found"));
+
+            var result1 = await _userManager.RedeemTwoFactorRecoveryCodeAsync(user, resetVM.TwoFactorCode);
+
+            if (!result1.Succeeded) return BadRequest(new ApiResponse(400, "Please check your OTP"));
 
             resetVM.token = resetVM.token.Replace(' ', '+');
 
@@ -317,7 +351,7 @@ namespace Acacia_Back_End.Controllers
 
             if (result.Succeeded) return Ok(new { message = "Password updated successfully" });
 
-            return BadRequest(new ApiResponse(400));
+            return BadRequest(new ApiResponse(400, "There was a problem reseting your password."));
         }
 
         private async Task<string> SaveProfilePictureImage(IFormFile file)

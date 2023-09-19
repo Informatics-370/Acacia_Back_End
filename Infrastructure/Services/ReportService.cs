@@ -158,16 +158,7 @@ namespace Acacia_Back_End.Infrastructure.Services
                 foreach (var orderItem in order.OrderItems)
                 {
                     var product = await _context.Products.Where(x => x.Id == orderItem.ItemOrdered.ProductItemId).Include(x => x.ProductCategory).Include(x => x.ProductType).FirstOrDefaultAsync();
-                    decimal productSaleTotal = 0;
-                    if (orderItem.Promotion != 0)
-                    {
-                        productSaleTotal = (orderItem.Price * orderItem.Quantity) * (1 - orderItem.Promotion / 100);
-                    }
-                    else
-                    {
-                        productSaleTotal = (orderItem.Price * orderItem.Quantity);
-                    }
-
+                    decimal productSaleTotal = (orderItem.Price * orderItem.Quantity) * (1 - orderItem.Promotion / 100);
 
                     var category = salesVM.Data.Where(x => x.CategoryId == product.ProductCategoryId).FirstOrDefault();
                     if (category != null)
@@ -229,7 +220,7 @@ namespace Acacia_Back_End.Infrastructure.Services
                 foreach (var orderItem in order.OrderItems)
                 {
                     var product = await _context.Products.Where(x => x.Id == orderItem.ItemOrdered.ProductItemId).Include(x => x.Supplier).FirstOrDefaultAsync();
-                    decimal productOrderTotal = (orderItem.Price * orderItem.Quantity);
+                    decimal productOrderTotal = (orderItem.Price * (orderItem.Quantity - orderItem.QuantityNotDelivered));
 
 
                     var supplier = supplierOrderVM.Data.Where(x => x.SupplierId == product.SupplierId).FirstOrDefault();
@@ -293,6 +284,18 @@ namespace Acacia_Back_End.Infrastructure.Services
                     break;
                 case "nameDesc":
                     products = products.OrderByDescending(p => p.Name).ToList();
+                    break;
+                case "quantityAsc":
+                    products = products.OrderBy(p => p.Quantity).ToList();
+                    break;
+                case "quantityDesc":
+                    products = products.OrderByDescending(p => p.Quantity).ToList();
+                    break;
+                case "thresholdAsc":
+                    products = products.OrderBy(p => p.TresholdValue).ToList();
+                    break;
+                case "thresholdDesc":
+                    products = products.OrderByDescending(p => p.TresholdValue).ToList();
                     break;
                 default:
                     products = products.OrderBy(n => n.Name).ToList();
@@ -376,7 +379,7 @@ namespace Acacia_Back_End.Infrastructure.Services
                 .ToList();  
             foreach(var order in orders)
             {
-                income += order.OrderItems.Sum(x => x.Price * x.Quantity);
+                income += order.OrderItems.Sum(x => (x.Price * x.Quantity) * (1 - x.Promotion / 100));
                 expenses += order.DeliveryMethod.Price;
             }
 
@@ -386,7 +389,7 @@ namespace Acacia_Back_End.Infrastructure.Services
                 .ToListAsync();
             foreach(var supOrder in supplierOrders)
             {
-                expenses += supOrder.OrderItems.Sum(x => x.Price * x.Quantity);
+                expenses += supOrder.OrderItems.Sum(x => x.Price * (x.Quantity - x.QuantityNotDelivered));
             }
 
             var returns = await _context.CustomerReturns
@@ -402,9 +405,19 @@ namespace Acacia_Back_End.Infrastructure.Services
                 .Include(x => x.ReturnItems)
                 .Where(x => string.IsNullOrEmpty(specParams.StartDate.ToString()) || (x.Date >= specParams.StartDate && x.Date <= specParams.EndDate))
                 .ToListAsync();
-            foreach (var supReturn in returns)
+            foreach (var supReturn in supReturns)
             {
                 supplierReturns += supReturn.ReturnItems.Sum(x => x.Price * x.Quantity);
+            }
+
+            var writeOffs = await _context.WriteOffs
+                .Include(x => x.Product)
+                .ThenInclude(x => x.PriceHistory)
+                .Where(x => string.IsNullOrEmpty(specParams.StartDate.ToString()) || (x.Date >= specParams.StartDate && x.Date <= specParams.EndDate))
+                .ToListAsync();
+            foreach (var writeOff in writeOffs)
+            {
+                expenses += writeOff.Product.GetPrice() * writeOff.Quantity;
             }
 
 

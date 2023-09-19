@@ -3,6 +3,7 @@ using System;
 using Acacia_Back_End.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Acacia_Back_End.Migrations
 {
     [DbContext(typeof(Context))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    [Migration("20230918163701_supplierDeliveryQuantity")]
+    partial class supplierDeliveryQuantity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.5");
@@ -646,9 +649,6 @@ namespace Acacia_Back_End.Migrations
 
                     b.Property<int>("ProductId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<double>("ProductPrice")
-                        .HasColumnType("REAL");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("INTEGER");

@@ -3,6 +3,7 @@ using System;
 using Acacia_Back_End.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Acacia_Back_End.Migrations
 {
     [DbContext(typeof(Context))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    [Migration("20230916195239_writeoff-fix")]
+    partial class writeofffix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.5");
@@ -513,9 +516,6 @@ namespace Acacia_Back_End.Migrations
                     b.Property<double>("Total")
                         .HasColumnType("REAL");
 
-                    b.Property<double>("TotalNotDelivered")
-                        .HasColumnType("REAL");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CompanyDetailsId");
@@ -535,9 +535,6 @@ namespace Acacia_Back_End.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("QuantityNotDelivered")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("SupplierOrderId")
@@ -646,9 +643,6 @@ namespace Acacia_Back_End.Migrations
 
                     b.Property<int>("ProductId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<double>("ProductPrice")
-                        .HasColumnType("REAL");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("INTEGER");

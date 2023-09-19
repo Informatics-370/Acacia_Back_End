@@ -11,6 +11,7 @@ namespace Acacia_Back_End.Core.ViewModels
         public string Status { get; set; }
         public IReadOnlyList<SupplierOrderItemVM> OrderItems { get; set; }
         public decimal Total { get; set; }
+        public decimal TotalNotDelivered { get; set; }
         public CompanyVM CompanyDetails { get; set; }
         public SupplierVM Supplier { get; set; }
     }
