@@ -158,7 +158,6 @@ namespace Acacia_Back_End.Controllers
                     document.Add(new Paragraph($"Invoice ID: {id}"));
                     document.Add(new Paragraph($"CustomerEmail: {order.CustomerEmail}"));
                     document.Add(new Paragraph($"DeliveryMethod: {order.DeliveryMethod.Name}"));
-                    document.Add(new Paragraph($"GroupElephantDiscount: {order.GroupElephantDiscount}"));
                     document.Add(new Paragraph($"OrderDate: {order.OrderDate}"));
                     document.Add(new Paragraph($"OrderType: {order.OrderType.Name}"));
                     document.Add(new Paragraph($"FirstName: {order.ShipToAddress.FirstName}"));
@@ -169,8 +168,11 @@ namespace Acacia_Back_End.Controllers
                     document.Add(new Paragraph($"City: {order.ShipToAddress.City}"));
                     document.Add(new Paragraph($"Province: {order.ShipToAddress.Province}"));
                     document.Add(new Paragraph($"PostalCode: {order.ShipToAddress.PostalCode}"));
-                    document.Add(new Paragraph($"SubTotal: {order.SubTotal}"));
+                    document.Add(new Paragraph($"SubTotal (Vat Inclusive): {order.SubTotal}"));
+                    document.Add(new Paragraph($"VAT: {order.VAT.Percentage}%"));
                     document.Add(new Paragraph($"Delivery price: {order.DeliveryMethod.Price}"));
+                    document.Add(new Paragraph($"GroupElephantDiscount: {order.GroupElephantDiscount}"));
+                    document.Add(new Paragraph($"Promotions: {order.Savings}"));
                     document.Add(new Paragraph($"Total: {order.GetTotal()}"));
 
                     foreach (var item in order.OrderItems)
@@ -179,7 +181,7 @@ namespace Acacia_Back_End.Controllers
                         document.Add(new Paragraph($"Product Name: {item.ItemOrdered.ProductName}"));
                         document.Add(new Paragraph($"Product Price: {item.Price}"));
                         document.Add(new Paragraph($"Product Quantity: {item.Quantity}"));
-                        document.Add(new Paragraph($"Product Promotion: {item.Promotion}"));
+                        document.Add(new Paragraph($"Product Promotion: {item.Promotion} % "));
                         document.Add(new Paragraph($"-------------------------------------------------"));
                     }
                     // Add more content as needed

@@ -85,6 +85,18 @@ namespace Acacia_Back_End.Infrastructure.Data
                 await context.SaveChangesAsync();
             }
 
+            if (!context.Vats.Any())
+            {
+                context.Vats.Add(new Vat
+                {
+                    StartDate = DateTime.Now,
+                    Percentage = 15,
+                    IsActive = true
+                });
+                await context.SaveChangesAsync();
+            }
+
+
 
             if (!context.Company.Any())
             {
