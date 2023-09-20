@@ -308,10 +308,10 @@ namespace Acacia_Back_End.Infrastructure.Data
                     orders = orders.OrderByDescending(x => x.OrderDate).ToList();
                     break;
                 case "totalAsc":
-                    orders = orders.OrderBy(x => x.SubTotal).ToList();
+                    orders = orders.OrderBy(x => x.GetTotal()).ToList();
                     break;
                 case "totalDesc":
-                    orders = orders.OrderByDescending(x => x.SubTotal).ToList();
+                    orders = orders.OrderByDescending(x => x.GetTotal()).ToList();
                     break;
                 default:
                     orders = orders.OrderByDescending(x => x.OrderDate).ToList();
@@ -327,6 +327,7 @@ namespace Acacia_Back_End.Infrastructure.Data
             .Include(x => x.OrderItems)
             .Include(x => x.DeliveryMethod)
             .Include(x => x.OrderType)
+            .Include(x => x.VAT)
             .FirstOrDefaultAsync();
         }
 
@@ -373,19 +374,21 @@ namespace Acacia_Back_End.Infrastructure.Data
             var deliveryMethod = await _context.DeliveryMethods.Where(x => x.Id == deliveryMethodId).FirstOrDefaultAsync();
 
             decimal subtotal = 0;
+            decimal savings = 0;
             foreach (var item in items)
             {
                 if (item.Promotion != 0)
                 {
-                    subtotal += (item.Price * item.Quantity) * (1 - item.Promotion / 100);
+                    savings += (item.Price * item.Quantity) * (item.Promotion / 100);
                 }
-                else
-                {
-                    subtotal += (item.Price * item.Quantity);
-                }
+                subtotal += (item.Price * item.Quantity);
             }
 
             var order = new Order(items, customerRmail, shippingAddress, deliveryMethod, orderTypeId, subtotal);
+
+            order.Savings = savings;
+
+            order.VAT = this.GetActiveVat().Result;
 
             order.OrderType = await _context.OrderTypes.Where(x => x.Id == orderTypeId).FirstOrDefaultAsync();
 
@@ -399,17 +402,14 @@ namespace Acacia_Back_End.Infrastructure.Data
                 order.GroupElephantDiscount = 10;
             }
 
-            this.GetActiveVat();
-
-
             await _context.Orders.AddAsync(order);
 
             await _context.SaveChangesAsync();
 
             foreach(var item in items)
             {
-                var product = await this.GetProductByIdAsync(item.Id);
-                if (product.Quantity <= product.TresholdValue)
+                var product = await this.GetProductByIdAsync(item.ItemOrdered.ProductItemId);
+                if (product != null && product.Quantity <= product.TresholdValue)
                 {
                     var result4 = CreateAutomatedSupplierOrderAsync("mzamotembe7@gmail.com", product);
                 }
@@ -441,10 +441,10 @@ namespace Acacia_Back_End.Infrastructure.Data
                     orders = orders.OrderBy(x => x.SubTotal).ToList();
                     break;
                 case "totalDesc":
-                    orders = orders.OrderByDescending(x => x.SubTotal).ToList();
+                    orders = orders.OrderByDescending(x => x.GetTotal()).ToList();
                     break;
                 default:
-                    orders = orders.OrderByDescending(x => x.OrderDate).ToList();
+                    orders = orders.OrderByDescending(x => x.GetTotal()).ToList();
                     break;
             }
             return orders;
@@ -1185,6 +1185,34 @@ namespace Acacia_Back_End.Infrastructure.Data
                 _context.DeliveryMethods.Update(deliveryMethod);
                 return await _context.SaveChangesAsync() > 0;
             }
+        }
+
+        public async Task<List<Product>> VerifyProductList(List<Product> products)
+        {
+            if(products == null || products.Count == 0)
+            {
+                return null;
+            }
+            foreach(var product in products)
+            {
+                var productPrice = new ProductPrice
+                {
+                    ProductId = product.Id,
+                    Price = 100,
+                    StartDate = DateTime.Now
+                };
+                product.PriceHistory = new List<ProductPrice> { productPrice };
+                product.PictureUrl = "images/products/default.jpg";
+
+                var productType = _context.ProductTypes.Find(product.ProductTypeId);
+                var productCategory = _context.ProductTypes.Find(product.ProductCategoryId);
+                var productSupplier = _context.ProductTypes.Find(product.SupplierId);
+                if(productType == null || productCategory == null || productSupplier == null)
+                {
+                    return null;
+                }
+            }
+            return products;
         }
     }
 }
