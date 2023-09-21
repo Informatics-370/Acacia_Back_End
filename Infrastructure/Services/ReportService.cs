@@ -1,14 +1,14 @@
 ﻿using Acacia_Back_End.Core.Models;
 using Acacia_Back_End.Core.Models.CustomerOrders;
 using Acacia_Back_End.Core.Models.Identities;
+using Acacia_Back_End.Core.Models.SupplierOrders;
 using Acacia_Back_End.Core.Specifications;
 using Acacia_Back_End.Core.ViewModels;
+using Acacia_Back_End.Helpers;
 using Acacia_Back_End.Infrastructure.Data;
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using NPOI.SS.Formula.Functions;
-using StackExchange.Redis;
-using static iTextSharp.text.pdf.AcroFields;
 
 namespace Acacia_Back_End.Infrastructure.Services
 {
@@ -17,12 +17,14 @@ namespace Acacia_Back_End.Infrastructure.Services
         private readonly Context _context;
         private readonly UserManager<AppUser> _usermanager;
         private readonly IConfiguration _config;
+        private readonly IMapper _mapper;
 
-        public ReportService(Context context, UserManager<AppUser> usermanager, IConfiguration config)
+        public ReportService(Context context, UserManager<AppUser> usermanager, IConfiguration config, IMapper mapper)
         {
             _context = context;
             _usermanager = usermanager;
             _config = config;
+            _mapper = mapper;
         }
         public async Task<ReportsVM> GetProductsReportAsync(ReportParams specParams)
         {
@@ -420,6 +422,36 @@ namespace Acacia_Back_End.Infrastructure.Services
                 SupplierReturns = supplierReturns,
                 SalesReturns = salesReturns,
                 Profit = (income + supplierReturns + salesReturns) - (expenses)
+            };
+        }
+
+        public async Task<DashboardReportVM> GetDashboardReportAsync()
+        {
+            var orders = await _context.Orders
+                .Include(x => x.OrderItems)
+                .Include(x => x.DeliveryMethod)
+                .ToListAsync();
+
+            var totalSales = orders.Sum(x => x.GetTotal());
+            var totalUsers = await _usermanager.Users.CountAsync();
+            var totalItemsSold = await _context.OrderItems.SumAsync(x => x.Quantity);
+            var pendingSupplierOrders = await _context.SupplierOrders.CountAsync(x => x.Status == SupplierOrderStatus.Pending);
+
+            var custOrders = await _context.Orders
+                .Include(x => x.ShipToAddress)
+                .Include(x => x.OrderItems)
+                .Include(x => x.DeliveryMethod)
+                .Include(x => x.OrderType)
+                .Where(x => x.Status == OrderStatus.ReadyForCollection || x.Status == OrderStatus.PaymentConfirmed)
+                .ToListAsync();
+
+            return new DashboardReportVM
+            {
+                Orders = _mapper.Map<IReadOnlyList<OrderVM>>(custOrders),
+                TotalSales = totalSales,
+                ActiveUsers = totalUsers,
+                TotalItemsSold = totalItemsSold,
+                PendingSupplierOrders = pendingSupplierOrders
             };
         }
     }

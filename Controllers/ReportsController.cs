@@ -24,6 +24,18 @@ namespace Acacia_Back_End.Controllers
             _mapper = mapper;
         }
 
+        
+
+        [HttpGet("DashboardReport")]
+        public async Task<ActionResult<DashboardReportVM>> GetDashboardReport()
+        {
+            var reports = await _reportService.GetDashboardReportAsync();
+
+            if (reports == null) return NotFound(new ApiResponse(404));
+
+            return Ok(reports);
+        }
+
         [HttpGet("ProductTrends")]
         public async Task<ActionResult<Pagination<ProductVM>>> GetProducts([FromQuery] ReportParams specParams)
         {

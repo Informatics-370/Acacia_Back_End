@@ -19,5 +19,7 @@ namespace Acacia_Back_End.Infrastructure.Services
         Task<SupplierReportVM> GetSupplierOrdersReportAsync(ReportParams specParams);
 
         Task<ProfitabilityReportVM> GetProfitabilityReportAsync(ReportParams specParams);
+
+        Task<DashboardReportVM> GetDashboardReportAsync();
     }
 }

@@ -426,7 +426,8 @@ namespace Acacia_Back_End.Infrastructure.Data
                 .Include(x => x.DeliveryMethod)
                 .Include(x => x.OrderType)
                 .Where(x => (string.IsNullOrEmpty(searchParams.Search) || x.CustomerEmail.ToLower().Contains(searchParams.Search.ToLower())) &&
-                            (!searchParams.DeliveryMethodId.HasValue || x.DeliveryMethodId == searchParams.DeliveryMethodId))
+                            (!searchParams.DeliveryMethodId.HasValue || x.DeliveryMethodId == searchParams.DeliveryMethodId) &&
+                            (string.IsNullOrEmpty(searchParams.Status) || x.Status.ToString() == searchParams.Status))
                 .ToListAsync();
 
             switch (searchParams.sort)

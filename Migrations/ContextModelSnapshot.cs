@@ -46,7 +46,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Company");
+                    b.ToTable("Company", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.CustomerOrders.DeliveryMethod", b =>
@@ -69,7 +69,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DeliveryMethods");
+                    b.ToTable("DeliveryMethods", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.CustomerOrders.Order", b =>
@@ -117,7 +117,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasIndex("VATId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.CustomerOrders.OrderItem", b =>
@@ -142,7 +142,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.CustomerOrders.OrderType", b =>
@@ -156,7 +156,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("OrderTypes");
+                    b.ToTable("OrderTypes", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.CustomerReturns.CustomerReturn", b =>
@@ -184,7 +184,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("CustomerReturns");
+                    b.ToTable("CustomerReturns", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.CustomerReturns.ReturnItem", b =>
@@ -215,7 +215,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasIndex("CustomerReturnId");
 
-                    b.ToTable("ReturnItems");
+                    b.ToTable("ReturnItems", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.FAQ", b =>
@@ -232,7 +232,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("FAQs");
+                    b.ToTable("FAQs", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.GiftBox", b =>
@@ -252,7 +252,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("GiftBoxes");
+                    b.ToTable("GiftBoxes", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.GiftBoxPrice", b =>
@@ -280,7 +280,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasIndex("GiftBoxId");
 
-                    b.ToTable("GiftBoxPrices");
+                    b.ToTable("GiftBoxPrices", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.Media", b =>
@@ -303,7 +303,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MediaItems");
+                    b.ToTable("MediaItems", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.Product", b =>
@@ -357,7 +357,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.ProductCategory", b =>
@@ -371,7 +371,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ProductCategories");
+                    b.ToTable("ProductCategories", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.ProductPrice", b =>
@@ -396,7 +396,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductPrices");
+                    b.ToTable("ProductPrices", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.ProductReview", b =>
@@ -430,7 +430,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductReviews");
+                    b.ToTable("ProductReviews", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.ProductType", b =>
@@ -444,7 +444,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ProductTypes");
+                    b.ToTable("ProductTypes", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.Promotion", b =>
@@ -467,7 +467,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Promotions");
+                    b.ToTable("Promotions", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.Supplier", b =>
@@ -487,7 +487,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Suppliers");
+                    b.ToTable("Suppliers", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.SupplierOrders.SupplierOrder", b =>
@@ -530,7 +530,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("SupplierOrders");
+                    b.ToTable("SupplierOrders", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.SupplierOrders.SupplierOrderItem", b =>
@@ -555,7 +555,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasIndex("SupplierOrderId");
 
-                    b.ToTable("SupplierOrderItems");
+                    b.ToTable("SupplierOrderItems", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.SupplierReturns.SupplierReturn", b =>
@@ -583,7 +583,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasIndex("SupplierOrderId");
 
-                    b.ToTable("SupplierReturns");
+                    b.ToTable("SupplierReturns", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.SupplierReturns.SupplierReturnItem", b =>
@@ -614,7 +614,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasIndex("SupplierReturnId");
 
-                    b.ToTable("SupplierReturnItems");
+                    b.ToTable("SupplierReturnItems", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.Vat", b =>
@@ -637,7 +637,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Vats");
+                    b.ToTable("Vats", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.WriteOff", b =>
@@ -669,7 +669,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("WriteOffs");
+                    b.ToTable("WriteOffs", (string)null);
                 });
 
             modelBuilder.Entity("GiftBoxProduct", b =>
@@ -684,7 +684,7 @@ namespace Acacia_Back_End.Migrations
 
                     b.HasIndex("ProductsId");
 
-                    b.ToTable("GiftBoxProduct");
+                    b.ToTable("GiftBoxProduct", (string)null);
                 });
 
             modelBuilder.Entity("Acacia_Back_End.Core.Models.CustomerOrders.Order", b =>
@@ -705,7 +705,7 @@ namespace Acacia_Back_End.Migrations
                         .WithMany()
                         .HasForeignKey("VATId");
 
-                    b.OwnsOne("Acacia_Back_End.Core.Models.CustomerOrders.OrderAddress", "ShipToAddress", b1 =>
+                    b.OwnsOne("Acacia_Back_End.Core.Models.CustomerOrders.Order.ShipToAddress#Acacia_Back_End.Core.Models.CustomerOrders.OrderAddress", "ShipToAddress", b1 =>
                         {
                             b1.Property<int>("OrderId")
                                 .HasColumnType("INTEGER");
@@ -739,7 +739,7 @@ namespace Acacia_Back_End.Migrations
 
                             b1.HasKey("OrderId");
 
-                            b1.ToTable("Orders");
+                            b1.ToTable("Orders", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("OrderId");
@@ -762,7 +762,7 @@ namespace Acacia_Back_End.Migrations
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.OwnsOne("Acacia_Back_End.Core.Models.CustomerOrders.ProductOrdered", "ItemOrdered", b1 =>
+                    b.OwnsOne("Acacia_Back_End.Core.Models.CustomerOrders.OrderItem.ItemOrdered#Acacia_Back_End.Core.Models.CustomerOrders.ProductOrdered", "ItemOrdered", b1 =>
                         {
                             b1.Property<int>("OrderItemId")
                                 .HasColumnType("INTEGER");
@@ -781,7 +781,7 @@ namespace Acacia_Back_End.Migrations
 
                             b1.HasKey("OrderItemId");
 
-                            b1.ToTable("OrderItems");
+                            b1.ToTable("OrderItems", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("OrderItemId");
@@ -893,7 +893,7 @@ namespace Acacia_Back_End.Migrations
                         .HasForeignKey("SupplierOrderId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.OwnsOne("Acacia_Back_End.Core.Models.SupplierOrders.SupplierProductOrdered", "ItemOrdered", b1 =>
+                    b.OwnsOne("Acacia_Back_End.Core.Models.SupplierOrders.SupplierOrderItem.ItemOrdered#Acacia_Back_End.Core.Models.SupplierOrders.SupplierProductOrdered", "ItemOrdered", b1 =>
                         {
                             b1.Property<int>("SupplierOrderItemId")
                                 .HasColumnType("INTEGER");
@@ -909,7 +909,7 @@ namespace Acacia_Back_End.Migrations
 
                             b1.HasKey("SupplierOrderItemId");
 
-                            b1.ToTable("SupplierOrderItems");
+                            b1.ToTable("SupplierOrderItems", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("SupplierOrderItemId");

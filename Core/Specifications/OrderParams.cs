@@ -14,7 +14,8 @@
             set => _pageSize = (value > MaxPageSize) ? MaxPageSize : value;
         }
         public int? DeliveryMethodId { get; set; }
-
+        public string? Status { get; set; }
+        
         public string sort { get; set; }
 
         private string _search;
