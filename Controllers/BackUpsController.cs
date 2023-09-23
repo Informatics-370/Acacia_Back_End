@@ -1,6 +1,6 @@
 ﻿using Acacia_Back_End.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.Sqlite;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
 
@@ -21,94 +21,94 @@ namespace Acacia_Back_End.Controllers
             public DateTime CreatedAt { get; set; }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ListBackups()
-        {
-            try
-            {
-                string backupFolderPath = "wwwroot/backups"; // Adjust the folder path as needed
-                DirectoryInfo directoryInfo = new DirectoryInfo(backupFolderPath);
+        //[HttpGet]
+        //public async Task<IActionResult> ListBackups()
+        //{
+        //    try
+        //    {
+        //        string backupFolderPath = "wwwroot/backups"; // Adjust the folder path as needed
+        //        DirectoryInfo directoryInfo = new DirectoryInfo(backupFolderPath);
 
-                var backups = directoryInfo.GetFiles("*.sqlite")
-                    .OrderByDescending(f => f.CreationTime)
-                    .Select(f => new BackupInfo
-                    {
-                        FileName = f.Name,
-                        CreatedAt = f.CreationTime
-                    })
-                    .ToList();
+        //        var backups = directoryInfo.GetFiles("*.sqlite")
+        //            .OrderByDescending(f => f.CreationTime)
+        //            .Select(f => new BackupInfo
+        //            {
+        //                FileName = f.Name,
+        //                CreatedAt = f.CreationTime
+        //            })
+        //            .ToList();
 
-                return Ok(backups);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Failed to list backups: {ex.Message}");
-            }
-        }
+        //        return Ok(backups);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest($"Failed to list backups: {ex.Message}");
+        //    }
+        //}
 
-        [HttpPost("backup")]
-        public async Task<IActionResult> Backup()
-        {
-            try
-            {
-                string backupFolderPath = "wwwroot/backups"; // Adjust the folder path as needed
-                if (!Directory.Exists(backupFolderPath))
-                {
-                    Directory.CreateDirectory(backupFolderPath);
-                }
+        //[HttpPost("backup")]
+        //public async Task<IActionResult> Backup()
+        //{
+        //    try
+        //    {
+        //        string backupFolderPath = "wwwroot/backups"; // Adjust the folder path as needed
+        //        if (!Directory.Exists(backupFolderPath))
+        //        {
+        //            Directory.CreateDirectory(backupFolderPath);
+        //        }
 
-                string backupFileName = $"backup_{DateTime.Now:yyyyMMddHHmmss}.sqlite";
-                string backupFullPath = Path.Combine(backupFolderPath, backupFileName);
+        //        string backupFileName = $"backup_{DateTime.Now:yyyyMMddHHmmss}.sqlite";
+        //        string backupFullPath = Path.Combine(backupFolderPath, backupFileName);
 
-                using (var source = new SqliteConnection(_context.Database.GetConnectionString()))
-                {
-                    source.Open();
-                    using (var destination = new SqliteConnection($"Data Source={backupFullPath}"))
-                    {
-                        destination.Open();
-                        source.BackupDatabase(destination);
-                    }
-                }
+        //        using (var source = new SqliteConnection(_context.Database.GetConnectionString()))
+        //        {
+        //            source.Open();
+        //            using (var destination = new SqliteConnection($"Data Source={backupFullPath}"))
+        //            {
+        //                destination.Open();
+        //                source.BackupDatabase(destination);
+        //            }
+        //        }
 
-                return Ok($"Backup completed successfully. Backup file: {backupFileName}");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Backup failed: {ex.Message}");
-            }
-        }
+        //        return Ok($"Backup completed successfully. Backup file: {backupFileName}");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest($"Backup failed: {ex.Message}");
+        //    }
+        //}
 
-        [HttpPost("restore/{backupFileName}")]
-        public IActionResult Restore(string backupFileName)
-        {
-            try
-            {
-                string backupFolderPath = "wwwroot/backups"; // Adjust the folder path as needed
-                string restoreFileName = Path.Combine(backupFolderPath, backupFileName);
+        //[HttpPost("restore/{backupFileName}")]
+        //public IActionResult Restore(string backupFileName)
+        //{
+        //    try
+        //    {
+        //        string backupFolderPath = "wwwroot/backups"; // Adjust the folder path as needed
+        //        string restoreFileName = Path.Combine(backupFolderPath, backupFileName);
 
-                if (!System.IO.File.Exists(restoreFileName))
-                {
-                    // The specified backup file does not exist in the backup folder
-                    return BadRequest("The specified backup file does not exist.");
-                }
+        //        if (!System.IO.File.Exists(restoreFileName))
+        //        {
+        //            // The specified backup file does not exist in the backup folder
+        //            return BadRequest("The specified backup file does not exist.");
+        //        }
 
-                using (var source = new SqliteConnection($"Data Source={restoreFileName}"))
-                {
-                    source.Open();
-                    using (var destination = new SqliteConnection(_context.Database.GetConnectionString()))
-                    {
-                        destination.Open();
-                        source.BackupDatabase(destination);
-                    }
-                }
+        //        using (var source = new SqliteConnection($"Data Source={restoreFileName}"))
+        //        {
+        //            source.Open();
+        //            using (var destination = new SqliteConnection(_context.Database.GetConnectionString()))
+        //            {
+        //                destination.Open();
+        //                source.BackupDatabase(destination);
+        //            }
+        //        }
 
-                return Ok("Restore completed successfully!");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Restore failed: {ex.Message}");
-            }
-        }
+        //        return Ok("Restore completed successfully!");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest($"Restore failed: {ex.Message}");
+        //    }
+        //}
 
         //public async Task<IActionResult> CreateBackup()
         //{

@@ -2,7 +2,6 @@
 using Acacia_Back_End.Core.Interfaces;
 using Acacia_Back_End.Core.Models;
 using Acacia_Back_End.Core.Specifications;
-using SQLitePCL;
 using Acacia_Back_End.Helpers;
 using Microsoft.AspNetCore.Identity;
 using NPOI.HSSF.Record.Chart;

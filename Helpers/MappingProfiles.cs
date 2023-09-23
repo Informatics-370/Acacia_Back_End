@@ -2,7 +2,6 @@
 using Acacia_Back_End.Core.Models;
 using Acacia_Back_End.Core.ViewModels;
 using Acacia_Back_End.Core.Models.Identities;
-using SQLitePCL;
 using Acacia_Back_End.Infrastructure.Data;
 using NPOI.Util.Collections;
 using Org.BouncyCastle.Crypto;

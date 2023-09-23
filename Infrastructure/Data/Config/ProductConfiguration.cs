@@ -11,8 +11,8 @@ namespace Acacia_Back_End.Infrastructure.Data.Config
             builder.Property(p => p.Id).IsRequired();
             builder.Property(p => p.Quantity).IsRequired();
             builder.Property(p => p.TresholdValue).IsRequired();
-            builder.Property(p => p.Name).IsRequired().HasMaxLength(100);
-            builder.Property(p => p.Description).IsRequired().HasMaxLength(180);
+            builder.Property(p => p.Name).IsRequired();
+            builder.Property(p => p.Description).IsRequired();
             builder.Property(p => p.PictureUrl).IsRequired();
             builder.HasOne(b => b.ProductCategory).WithMany().HasForeignKey(p => p.ProductCategoryId);
             builder.HasOne(b => b.ProductType).WithMany().HasForeignKey(p => p.ProductTypeId);

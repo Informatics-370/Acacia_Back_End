@@ -1,18 +1,14 @@
 [
   {
-    "Id": 1,
     "Name": "Tools"
   },
   {
-    "Id": 2,
     "Name": "Artifacts"
   },
   {
-    "Id": 3,
     "Name": "Packages"
   },
   {
-    "Id": 4,
     "Name": "Accessories"
   }
 ]
