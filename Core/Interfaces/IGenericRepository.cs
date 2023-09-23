@@ -33,6 +33,7 @@ namespace Acacia_Back_End.Core.Interfaces
         //Products
         Task<IReadOnlyList<Product>> GetProductsAsync(ProductSpecParams pageParams);
         Task<Product> GetProductByIdAsync(int id);
+        Task<List<Product>> VerifyProductList(List<Product> products);
 
         //GiftBoxes
         Task<IReadOnlyList<GiftBox>> GetGiftBoxesAsync(SpecParams specParams);
@@ -102,5 +103,15 @@ namespace Acacia_Back_End.Core.Interfaces
 
         // Media CRUDs
         Task<IReadOnlyList<Media>> GetMediaListAsync(SpecParams searchParams);
+
+        // Delete Cascade
+        Task<bool> RemoveProduct(int id);
+        Task<bool> RemoveProductType(int id);
+        Task<bool> RemoveProductCategory(int id);
+        Task<bool> RemoveSupplier(int id);
+        Task<bool> RemoveGiftBox(int id);
+        Task<bool> RemoveDeliveryMethod(int id);
+        Task<bool> UpdateDeliveryMethod(DeliveryMethod deliveryMethod);
+
     }
 }

@@ -52,6 +52,7 @@ try
 {
     await context.Database.MigrateAsync();
     await Identitycontext.Database.MigrateAsync();
+
     await ContextSeed.SeedAsync(context);
     await AppIdentityDbContextSeed.SeedUserAsync(userManager);
 }

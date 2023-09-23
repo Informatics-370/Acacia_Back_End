@@ -16,12 +16,13 @@ namespace Acacia_Back_End.Extensions
         {
             services.AddDbContext<Context>(opt =>
             {
-                opt.UseSqlite(config.GetConnectionString("DefaultConnection"));
+                opt.UseSqlServer(config.GetConnectionString("DefaultConnection"));
             });
 
             services.AddSingleton<IConnectionMultiplexer>(c =>
             {
                 var options = ConfigurationOptions.Parse(config.GetConnectionString("Redis"));
+                options.Password = config.GetConnectionString("RedisPassword");
                 return ConnectionMultiplexer.Connect(options);
             });
 
@@ -31,7 +32,7 @@ namespace Acacia_Back_End.Extensions
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IReportService, ReportService>();
-            services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IReportService, ReportService>();
             services.AddScoped(typeof(IGenericRepository<>), (typeof(GenericRepository<>)));
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.Configure<ApiBehaviorOptions>(options =>
@@ -54,7 +55,7 @@ namespace Acacia_Back_End.Extensions
             {
                 opt.AddPolicy("CorsPolicy", policy =>
                 {
-                    policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"); 
+                    policy.AllowAnyHeader().AllowAnyMethod().WithOrigins(config.GetConnectionString("FrontEndUrl")); 
                 });
             });
 

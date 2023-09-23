@@ -12,6 +12,11 @@ using Microsoft.AspNetCore.Authorization;
 using NPOI.SS.Formula.Functions;
 using NPOI.Util;
 using System.Text.Json;
+using OfficeOpenXml;
+using Microsoft.VisualBasic;
+using NPOI.SS.Formula;
+using NPOI.SS.UserModel;
+using System.Runtime.Intrinsics.X86;
 
 
 namespace Acacia_Back_End.Controllers
@@ -60,6 +65,22 @@ namespace Acacia_Back_End.Controllers
             return _mapper.Map<Product, ProductVM>(product);
         }
 
+        [HttpGet("product/{id}")]
+        // Swagger configuration
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ProductDto>> GetProductById(int id)
+        {
+
+            var product = await _productsRepo.GetProductByIdAsync(id);
+
+            if (product == null)
+            {
+                return NotFound(new ApiResponse(404));
+            }
+            return _mapper.Map<Product, ProductDto>(product);
+        }
+
         [HttpGet("categories")]
         public async Task<ActionResult<IReadOnlyList<ProductCategory>>> GetProductCategories()
         {
@@ -74,8 +95,33 @@ namespace Acacia_Back_End.Controllers
 
         [HttpPost]
         [DisableRequestSizeLimit]
-        [Route("AddProductList")]
-        public async Task<IActionResult> AddProductList([FromForm] JsonFilesVM JsonProducts)
+        [Route("AddExcelProductList")]
+        public async Task<IActionResult> AddExcelProductList([FromForm] JsonFilesVM excelProducts)
+        {
+            using (var stream = new MemoryStream())
+            {
+                excelProducts.ProductList.CopyTo(stream);
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using (var package = new ExcelPackage(stream))
+                {
+                    var sheet = package.Workbook.Worksheets.FirstOrDefault(); // Assuming there is only one sheet
+                    if (sheet == null) return BadRequest(new ApiResponse(400, "The Excel file does not contain any sheets."));
+
+                    var products = GetList<Product>(sheet);
+                    var verifiedProducts = await _productsRepo.VerifyProductList(products);
+                    if(verifiedProducts == null) return BadRequest(new ApiResponse(400, "Please check the data in your products list."));
+
+                    var result = await _productsRepo.AddEntityList(verifiedProducts);
+                    if (result == false) return BadRequest(new ApiResponse(400, "There was a probalem adding the list to the database."));
+                }
+                return Ok();
+            }
+        }
+
+        [HttpPost]
+        [DisableRequestSizeLimit]
+        [Route("AddJsonProductList")]
+        public async Task<IActionResult> AddJsonProductList([FromForm] JsonFilesVM JsonProducts)
         {
             if (JsonProducts.ProductList != null)
             {
@@ -108,6 +154,7 @@ namespace Acacia_Back_End.Controllers
 
             return BadRequest(new ApiResponse(400, "No file or empty file uploaded."));
         }
+
 
         // Base64 Version
         [HttpPost, DisableRequestSizeLimit]
@@ -195,11 +242,11 @@ namespace Acacia_Back_End.Controllers
         [Authorize]
         public async Task<ActionResult<ProductVM>> DeleteProduct(int id)
         {
-            var result = await _productsRepo.RemoveEntity(id);
+            var result = await _productsRepo.RemoveProduct(id);
 
             if (result == true) return Ok();
 
-            return BadRequest("There was a problem adding a deleting the product");
+            return BadRequest(new ApiResponse (400, "There was a problem adding a deleting the product. Please check for any associations before deleting."));
         }
 
 
@@ -230,11 +277,11 @@ namespace Acacia_Back_End.Controllers
         [Authorize]
         public async Task<ActionResult> DeleteProductCategory(int id)
         {
-            var result = await _productCategoryRepo.RemoveEntity(id);
+            var result = await _productCategoryRepo.RemoveProductCategory(id);
 
             if (result == true) return Ok();
 
-            return BadRequest(new ApiResponse(400, "There was a problem deleting the product category"));
+            return BadRequest(new ApiResponse(400, "There was a problem deleting the product category. Please check for any associations before deleting."));
         }
 
         [HttpPut("category/update/{id}")]
@@ -280,11 +327,11 @@ namespace Acacia_Back_End.Controllers
         [Authorize]
         public async Task<ActionResult> DeleteProductType(int id)
         {
-            var result = await _productTypeRepo.RemoveEntity(id);
+            var result = await _productTypeRepo.RemoveProductType(id);
 
             if (result == true) return Ok();
 
-            return BadRequest(new ApiResponse(400, "There was a problem deleting the product type"));
+            return BadRequest(new ApiResponse(400, "There was a problem deleting the product type. Please check for any associations before deleting."));
         }
 
         [HttpPut("type/update/{id}")]
@@ -344,6 +391,50 @@ namespace Acacia_Back_End.Controllers
                 return "images/products/" + uniqueFileName;
             }
             return null;
+        }
+
+        private List<T> GetList<T>(ExcelWorksheet sheet)
+        {
+            List<T> list = new List<T>();
+
+            // First row is for knowing the properties of the object
+            var columnInfo = Enumerable.Range(1, sheet.Dimension.Columns)
+                .Select(n => new { Index = n, ColumnName = sheet.Cells[1, n].Value?.ToString() })
+                .ToList();
+
+            for (int row = 2; row <= sheet.Dimension.Rows; row++)
+            {
+                T obj = Activator.CreateInstance<T>();
+                foreach (var prop in typeof(T).GetProperties())
+                {
+                    var columnName = prop.Name;
+                    var colInfo = columnInfo.FirstOrDefault(c => c.ColumnName == columnName);
+                    if (colInfo != null)
+                    {
+                        int col = colInfo.Index;
+                        var val = sheet.Cells[row, col].Value;
+                        var propType = prop.PropertyType;
+
+                        // Handle null values
+                        if (val != null)
+                        {
+                            if (propType == typeof(int?))
+                            {
+                                // Handle conversion from double to int?
+                                prop.SetValue(obj, (int?)Convert.ToInt32(val));
+                            }
+                            else
+                            {
+                                // For other property types, use Convert.ChangeType
+                                prop.SetValue(obj, Convert.ChangeType(val, propType));
+                            }
+                        }
+                    }
+                }
+                list.Add(obj);
+            }
+
+            return list;
         }
 
     }

@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "mssql1": {
+      "secretStore": "AzureAppSettings",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourcegroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/acacia-back-enddbserver/databases/Acacia_Back_End_db",
+      "type": "mssql.azure",
+      "connectionId": "Acacia_Back_End_db",
+      "dynamicId": null
+    },
+    "mssql2": {
+      "secretStore": "AzureAppSettings",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourcegroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/acacia-back-enddbserver/databases/Identity_db",
+      "type": "mssql.azure",
+      "connectionId": "Identity_db"
+    }
+  }
+}

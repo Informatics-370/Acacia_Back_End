@@ -15,7 +15,7 @@ namespace Acacia_Back_End.Extensions
         {
             services.AddDbContext<AppIdentityDbContext>(opt =>
             {
-                opt.UseSqlite(config.GetConnectionString("IdentityConnection"));
+                opt.UseSqlServer(config.GetConnectionString("IdentityConnection"));
             }
             );
             services.AddIdentityCore<AppUser>(opt =>

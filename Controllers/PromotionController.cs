@@ -100,7 +100,7 @@ namespace Acacia_Back_End.Controllers
         {
             var result = await _promotionsRepo.RemovePromotion(id);
 
-            if (result == false) return BadRequest(new ApiResponse(400));
+            if (result == false) return BadRequest(new ApiResponse(400, "There was a problem adding a deleting the promotion. Please check for any associations before deleting."));
 
             return Ok();
         }

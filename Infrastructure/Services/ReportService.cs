@@ -1,13 +1,14 @@
 ﻿using Acacia_Back_End.Core.Models;
 using Acacia_Back_End.Core.Models.CustomerOrders;
 using Acacia_Back_End.Core.Models.Identities;
+using Acacia_Back_End.Core.Models.SupplierOrders;
 using Acacia_Back_End.Core.Specifications;
 using Acacia_Back_End.Core.ViewModels;
+using Acacia_Back_End.Helpers;
 using Acacia_Back_End.Infrastructure.Data;
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using NPOI.SS.Formula.Functions;
-using static iTextSharp.text.pdf.AcroFields;
 
 namespace Acacia_Back_End.Infrastructure.Services
 {
@@ -16,82 +17,75 @@ namespace Acacia_Back_End.Infrastructure.Services
         private readonly Context _context;
         private readonly UserManager<AppUser> _usermanager;
         private readonly IConfiguration _config;
+        private readonly IMapper _mapper;
 
-        public ReportService(Context context, UserManager<AppUser> usermanager, IConfiguration config)
+        public ReportService(Context context, UserManager<AppUser> usermanager, IConfiguration config, IMapper mapper)
         {
             _context = context;
             _usermanager = usermanager;
             _config = config;
+            _mapper = mapper;
         }
-
         public async Task<ReportsVM> GetProductsReportAsync(ReportParams specParams)
         {
-            // Calculate total sales (Price * Quantity) for each product
-            var productSalesQuery = _context.OrderItems
-                .Include(x => x.ItemOrdered)
-                .GroupBy(x => x.ItemOrdered.ProductItemId)
-                .Select(g => new
-                {
-                    ProductId = g.Key,
-                    TotalSales = g.Sum(item => item.Price * item.Quantity * (1 - item.Promotion / 100)),
-                    ProductCategoryId = 0
-                });
-
-            if (specParams.CategoryId.HasValue)
-            {
-                productSalesQuery = productSalesQuery
-                    .Join(_context.Products,
-                        ps => ps.ProductId,
-                        p => p.Id,
-                        (ps, p) => new
-                        {
-                            ProductId = ps.ProductId,
-                            TotalSales = ps.TotalSales,
-                            ProductCategoryId = p.ProductCategoryId
-                        })
-                    .Where(x => x.ProductCategoryId == specParams.CategoryId);
-            }
-
-            var productSales = await productSalesQuery.ToListAsync();
-
-            // Fetch product data (including ProductName and PromotionId) from the database
-            var productsData = await _context.Products
-                .Where(p => productSales.Select(ps => ps.ProductId).Contains(p.Id))
-                .Select(p => new
-                {
-                    p.Id,
-                    p.Name,
-                    p.PromotionId
-                })
+            var orders = await _context.Orders
+                .Include(x => x.OrderItems)
+                .Include(x => x.DeliveryMethod)
+                .Where(x => string.IsNullOrEmpty(specParams.StartDate.ToString()) || (x.OrderDate >= specParams.StartDate && x.OrderDate <= specParams.EndDate))
                 .ToListAsync();
 
-            // Join the product data with the total sales
-            var productDataWithSales = productsData
-                .Join(productSales,
-                    pData => pData.Id,
-                    ps => ps.ProductId,
-                    (pData, sales) => new
+            // Create a dictionary to store product sales totals
+            Dictionary<int, decimal> productSalesTotals = new Dictionary<int, decimal>();
+            foreach (var order in orders)
+            {
+                foreach (var orderItem in order.OrderItems)
+                {
+                    // Check if the CategoryId is present and if the product's category matches the specParams
+                    if (!specParams.CategoryId.HasValue ||
+                        (_context.Products.Any(p => p.Id == orderItem.ItemOrdered.ProductItemId && p.ProductCategoryId == specParams.CategoryId)))
                     {
-                        ProductName = pData.Name,
-                        PromotionId = pData.PromotionId,
-                        TotalSales = sales.TotalSales
-                    })
-                .ToList();
+                        var productId = orderItem.ItemOrdered.ProductItemId;
+                        var productSaleTotal = (orderItem.Price * orderItem.Quantity) * (1 - orderItem.Promotion / 100);
 
-            // Sort the products by total sales in descending order
-            var sortedProducts = productDataWithSales
-                .OrderByDescending(pd => pd.TotalSales)
-                .ToList();
+                        // Apply GroupElephantDiscount if it exists at the order level
+                        if (order.GroupElephantDiscount != 0)
+                        {
+                            productSaleTotal *= (1 - order.GroupElephantDiscount / 100);
+                        }
 
-            // Select the product names and total sales for the report
+                        // Accumulate product sales totals
+                        if (productSalesTotals.ContainsKey(productId))
+                        {
+                            productSalesTotals[productId] += productSaleTotal;
+                        }
+                        else
+                        {
+                            productSalesTotals[productId] = productSaleTotal;
+                        }
+                    }
+                }
+            }
+
+
+            // Sort the products by total sales in descending order and take the top 5
+            var topProducts = productSalesTotals.OrderByDescending(kvp => kvp.Value).Take(5);
+
+            // Retrieve product data for the top products
+            var topProductData = await _context.Products
+                .Where(p => topProducts.Select(kvp => kvp.Key).Contains(p.Id))
+                .ToListAsync();
+
+            // Create the report data
             var reportData = new ReportsVM
             {
-                Labels = sortedProducts.Select(pd => pd.ProductName).Take(5).ToList(),
-                Data = sortedProducts.Select(pd => (decimal)pd.TotalSales).Take(5).ToList()
+                Labels = topProducts.Select(kvp => topProductData.First(p => p.Id == kvp.Key).Name).ToList(),
+                Data = topProducts.Select(kvp => kvp.Value).ToList()
             };
 
             return reportData;
         }
+
+
 
 
 
@@ -158,16 +152,7 @@ namespace Acacia_Back_End.Infrastructure.Services
                 foreach (var orderItem in order.OrderItems)
                 {
                     var product = await _context.Products.Where(x => x.Id == orderItem.ItemOrdered.ProductItemId).Include(x => x.ProductCategory).Include(x => x.ProductType).FirstOrDefaultAsync();
-                    decimal productSaleTotal = 0;
-                    if (orderItem.Promotion != 0)
-                    {
-                        productSaleTotal = (orderItem.Price * orderItem.Quantity) * (1 - orderItem.Promotion / 100);
-                    }
-                    else
-                    {
-                        productSaleTotal = (orderItem.Price * orderItem.Quantity);
-                    }
-
+                    decimal productSaleTotal = (orderItem.Price * orderItem.Quantity) * (1 - orderItem.Promotion / 100) * (1 - order.GroupElephantDiscount / 100);
 
                     var category = salesVM.Data.Where(x => x.CategoryId == product.ProductCategoryId).FirstOrDefault();
                     if (category != null)
@@ -229,7 +214,7 @@ namespace Acacia_Back_End.Infrastructure.Services
                 foreach (var orderItem in order.OrderItems)
                 {
                     var product = await _context.Products.Where(x => x.Id == orderItem.ItemOrdered.ProductItemId).Include(x => x.Supplier).FirstOrDefaultAsync();
-                    decimal productOrderTotal = (orderItem.Price * orderItem.Quantity);
+                    decimal productOrderTotal = (orderItem.Price * (orderItem.Quantity - orderItem.QuantityNotDelivered));
 
 
                     var supplier = supplierOrderVM.Data.Where(x => x.SupplierId == product.SupplierId).FirstOrDefault();
@@ -293,6 +278,18 @@ namespace Acacia_Back_End.Infrastructure.Services
                     break;
                 case "nameDesc":
                     products = products.OrderByDescending(p => p.Name).ToList();
+                    break;
+                case "quantityAsc":
+                    products = products.OrderBy(p => p.Quantity).ToList();
+                    break;
+                case "quantityDesc":
+                    products = products.OrderByDescending(p => p.Quantity).ToList();
+                    break;
+                case "thresholdAsc":
+                    products = products.OrderBy(p => p.TresholdValue).ToList();
+                    break;
+                case "thresholdDesc":
+                    products = products.OrderByDescending(p => p.TresholdValue).ToList();
                     break;
                 default:
                     products = products.OrderBy(n => n.Name).ToList();
@@ -376,7 +373,7 @@ namespace Acacia_Back_End.Infrastructure.Services
                 .ToList();  
             foreach(var order in orders)
             {
-                income += order.OrderItems.Sum(x => x.Price * x.Quantity);
+                income += order.OrderItems.Sum(x => (x.Price * x.Quantity) * (1 - x.Promotion / 100)) * (1 - order.GroupElephantDiscount / 100);
                 expenses += order.DeliveryMethod.Price;
             }
 
@@ -386,7 +383,7 @@ namespace Acacia_Back_End.Infrastructure.Services
                 .ToListAsync();
             foreach(var supOrder in supplierOrders)
             {
-                expenses += supOrder.OrderItems.Sum(x => x.Price * x.Quantity);
+                expenses += supOrder.OrderItems.Sum(x => x.Price * (x.Quantity - x.QuantityNotDelivered));
             }
 
             var returns = await _context.CustomerReturns
@@ -402,9 +399,19 @@ namespace Acacia_Back_End.Infrastructure.Services
                 .Include(x => x.ReturnItems)
                 .Where(x => string.IsNullOrEmpty(specParams.StartDate.ToString()) || (x.Date >= specParams.StartDate && x.Date <= specParams.EndDate))
                 .ToListAsync();
-            foreach (var supReturn in returns)
+            foreach (var supReturn in supReturns)
             {
                 supplierReturns += supReturn.ReturnItems.Sum(x => x.Price * x.Quantity);
+            }
+
+            var writeOffs = await _context.WriteOffs
+                .Include(x => x.Product)
+                .ThenInclude(x => x.PriceHistory)
+                .Where(x => string.IsNullOrEmpty(specParams.StartDate.ToString()) || (x.Date >= specParams.StartDate && x.Date <= specParams.EndDate))
+                .ToListAsync();
+            foreach (var writeOff in writeOffs)
+            {
+                expenses += writeOff.Product.GetPrice() * writeOff.Quantity;
             }
 
 
@@ -415,6 +422,36 @@ namespace Acacia_Back_End.Infrastructure.Services
                 SupplierReturns = supplierReturns,
                 SalesReturns = salesReturns,
                 Profit = (income + supplierReturns + salesReturns) - (expenses)
+            };
+        }
+
+        public async Task<DashboardReportVM> GetDashboardReportAsync()
+        {
+            var orders = await _context.Orders
+                .Include(x => x.OrderItems)
+                .Include(x => x.DeliveryMethod)
+                .ToListAsync();
+
+            var totalSales = orders.Sum(x => x.GetTotal());
+            var totalUsers = await _usermanager.Users.CountAsync();
+            var totalItemsSold = await _context.OrderItems.SumAsync(x => x.Quantity);
+            var pendingSupplierOrders = await _context.SupplierOrders.CountAsync(x => x.Status == SupplierOrderStatus.Pending);
+
+            var custOrders = await _context.Orders
+                .Include(x => x.ShipToAddress)
+                .Include(x => x.OrderItems)
+                .Include(x => x.DeliveryMethod)
+                .Include(x => x.OrderType)
+                .Where(x => x.Status == OrderStatus.ReadyForCollection || x.Status == OrderStatus.PaymentConfirmed)
+                .ToListAsync();
+
+            return new DashboardReportVM
+            {
+                Orders = _mapper.Map<IReadOnlyList<OrderVM>>(custOrders),
+                TotalSales = totalSales,
+                ActiveUsers = totalUsers,
+                TotalItemsSold = totalItemsSold,
+                PendingSupplierOrders = pendingSupplierOrders
             };
         }
     }

@@ -2,7 +2,6 @@
 using Acacia_Back_End.Core.Models;
 using Acacia_Back_End.Core.ViewModels;
 using Acacia_Back_End.Core.Models.Identities;
-using SQLitePCL;
 using Acacia_Back_End.Infrastructure.Data;
 using NPOI.Util.Collections;
 using Org.BouncyCastle.Crypto;
@@ -27,6 +26,14 @@ namespace Acacia_Back_End.Helpers
                 .ForMember(d => d.Price, o => o.MapFrom(s => s.GetPrice()))
                 .ForMember(d => d.Promotion, o => o.MapFrom(s => s.Promotion.IsActive ? s.Promotion.Percentage : 0))
             .ForMember(d => d.PictureUrl, o => o.MapFrom<ProductUrlResolver>());
+
+            CreateMap<Product, ProductDto>()
+    //.ForMember(d => d.ProductCategory, o => o.MapFrom(s => s.ProductCategory.Name))
+    //.ForMember(d => d.ProductType, o => o.MapFrom(s => s.ProductType.Name))
+    //.ForMember(d => d.Supplier, o => o.MapFrom(s => s.Supplier.Name))
+    .ForMember(d => d.Price, o => o.MapFrom(s => s.GetPrice()))
+    .ForMember(d => d.Promotion, o => o.MapFrom(s => s.Promotion.IsActive ? s.Promotion.Percentage : 0))
+.ForMember(d => d.PictureUrl, o => o.MapFrom<PictureUrlResolverDto>());
 
 
             CreateMap<AppUser, UserVM>()
