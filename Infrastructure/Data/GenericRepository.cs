@@ -2,7 +2,6 @@
 using Acacia_Back_End.Core.Interfaces;
 using Acacia_Back_End.Core.Models;
 using Acacia_Back_End.Core.Specifications;
-using SQLitePCL;
 using Acacia_Back_End.Helpers;
 using Microsoft.AspNetCore.Identity;
 using NPOI.HSSF.Record.Chart;
@@ -426,7 +425,8 @@ namespace Acacia_Back_End.Infrastructure.Data
                 .Include(x => x.DeliveryMethod)
                 .Include(x => x.OrderType)
                 .Where(x => (string.IsNullOrEmpty(searchParams.Search) || x.CustomerEmail.ToLower().Contains(searchParams.Search.ToLower())) &&
-                            (!searchParams.DeliveryMethodId.HasValue || x.DeliveryMethodId == searchParams.DeliveryMethodId))
+                            (!searchParams.DeliveryMethodId.HasValue || x.DeliveryMethodId == searchParams.DeliveryMethodId) &&
+                            (string.IsNullOrEmpty(searchParams.Status) || x.Status.ToString() == searchParams.Status))
                 .ToListAsync();
 
             switch (searchParams.sort)

@@ -1,5 +1,6 @@
 ﻿using Acacia_Back_End.Core.Models.Identities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Org.BouncyCastle.Crypto;
 
 namespace Acacia_Back_End.Infrastructure.Identity
@@ -8,7 +9,7 @@ namespace Acacia_Back_End.Infrastructure.Identity
     {
         public static async Task SeedUserAsync(UserManager<AppUser> userManager)
         {
-            if(!userManager.Users.Any())
+            if(!await userManager.Users.AnyAsync())
             {
                 var user = new AppUser
                 {
