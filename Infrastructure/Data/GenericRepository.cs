@@ -538,7 +538,7 @@ namespace Acacia_Back_End.Infrastructure.Data
             }
 
             var order = await _context.Orders.Where(x => x.Id == orderId).Include(x => x.OrderItems).ThenInclude(x => x.ItemOrdered).FirstOrDefaultAsync();
-            if (order == null || order.Status != OrderStatus.Dispatched)
+            if (order == null || order.Status == OrderStatus.PamymentFailed || order.Status == OrderStatus.Pending)
             {
                 return false;
             }

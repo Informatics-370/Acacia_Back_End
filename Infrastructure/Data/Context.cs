@@ -5,6 +5,7 @@ using Acacia_Back_End.Core.Models.CustomerOrders;
 using Acacia_Back_End.Core.Models.SupplierOrders;
 using Acacia_Back_End.Core.Models.CustomerReturns;
 using Acacia_Back_End.Core.Models.SupplierReturns;
+using Acacia_Back_End.Core.ViewModels;
 
 namespace Acacia_Back_End.Infrastructure.Data
 {
@@ -36,13 +37,23 @@ namespace Acacia_Back_End.Infrastructure.Data
         public DbSet<FAQ> FAQs { get; set; }
         public DbSet<Vat> Vats { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
-        public DbSet<Promotion> Promotions { get; set; }    
+        public DbSet<Promotion> Promotions { get; set; }
+        public DbSet<AuditTrailVM> SupplierOrderCombinedView { get; set; }
+        public DbSet<SaleOrderAuditVM> SalesOrderView { get; set; }
+        public DbSet<SaleReturnAuditVM> SalesReturnsView { get; set; }
+        public DbSet<SupplierReturnAuditVM> SupplierReturnsView { get; set; }
+        public DbSet<WriteOffAuditVM> WriteOffsView { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
+            modelBuilder.Entity<AuditTrailVM>().ToView("SupplierOrderCombinedView").HasNoKey();
+            modelBuilder.Entity<SaleOrderAuditVM>().ToView("SalesOrderView").HasNoKey();
+            modelBuilder.Entity<SaleReturnAuditVM>().ToView("SalesReturnsView").HasNoKey();
+            modelBuilder.Entity<SupplierReturnAuditVM>().ToView("SupplierReturnsView").HasNoKey();
+            modelBuilder.Entity<WriteOffAuditVM>().ToView("WriteOffsView").HasNoKey();
         }
     }
 }

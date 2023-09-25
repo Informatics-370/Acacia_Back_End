@@ -1,6 +1,7 @@
 ﻿using Acacia_Back_End.Core.Interfaces;
 using Acacia_Back_End.Core.Specifications;
 using Acacia_Back_End.Core.ViewModels;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace Acacia_Back_End.Infrastructure.Data
@@ -17,122 +18,109 @@ namespace Acacia_Back_End.Infrastructure.Data
         public async Task<IReadOnlyList<AuditTrailVM>> GetAuditTrailAsync(AuditSpecParams searchParams)
         {
             List<AuditTrailVM> auditTrail = new List<AuditTrailVM>();
+            if (string.IsNullOrEmpty(searchParams.Search))
+            {
+                searchParams.Search = ""; 
+            }
+
 
             switch (searchParams.AuditType)
             {
                 case "Sale Order":
-                    var saleOrders = await _context.Orders
-                        .Include(x => x.OrderItems)
-                        .Include(x => x.DeliveryMethod)
-                        .Where(x => (string.IsNullOrEmpty(searchParams.Search) || x.CustomerEmail.ToLower().Contains(searchParams.Search.ToLower())))
-                        .ToListAsync();
-
-                    foreach (var record in saleOrders)
+                    var saleOrdersSP = _context.SalesOrderView
+                        .FromSqlRaw("EXEC GetOrdersBySearch @Search", new SqlParameter("@Search", searchParams.Search))
+                        .ToList();
+                    foreach (var record in saleOrdersSP)
                     {
                         auditTrail.Add(new AuditTrailVM
                         {
-                            User = record.CustomerEmail,
+                            Email = record.Email,
                             Type = AuditTypeVM.SaleOrder.ToString(),
-                            Date = record.OrderDate,
-                            Amount = record.GetTotal(),
-                            Quantity = record.OrderItems.Sum(x => x.Quantity),
-                        });
-                    }
-                    break;
-                case "Supplier Order":
-                    var supplierOrders = await _context.SupplierOrders
-                        .Include(x => x.OrderItems)
-                        .Where(x => (string.IsNullOrEmpty(searchParams.Search) || x.ManagerEmail.ToLower().Contains(searchParams.Search.ToLower())))
-                        .ToListAsync();
-
-                    foreach (var record in supplierOrders)
-                    {
-                        auditTrail.Add(new AuditTrailVM
-                        {
-                            User = record.ManagerEmail,
-                            Type = AuditTypeVM.SupplierOrder.ToString(),
-                            Date = record.OrderDate,
-                            Amount = record.Total,
-                            Quantity = record.OrderItems.Sum(x => x.Quantity),
-                        });
-                    }
-                    break;
-                case "Sale Return":
-                    var saleReturnLog = await _context.CustomerReturns
-                        .Include(x => x.ReturnItems)
-                        .Where(x => (string.IsNullOrEmpty(searchParams.Search) || x.CustomerEmail.ToLower().Contains(searchParams.Search.ToLower()) || x.Description.ToLower().Contains(searchParams.Search.ToLower())))
-                        .ToListAsync();
-
-                    foreach (var record in saleReturnLog)
-                    {
-                        auditTrail.Add(new AuditTrailVM
-                        {
-                            User = record.CustomerEmail,
-                            Type = AuditTypeVM.SaleReturn.ToString(),
-                            Date = record.Date,
-                            Amount = record.Total,
-                            Quantity = record.ReturnItems.Sum(x => x.Quantity),
-                        });
-                    }
-                    break;
-                case "Supplier Return":
-                    var supplierReturnLog = await _context.SupplierReturns
-                        .Include(x => x.ReturnItems)
-                        .Where(x => (string.IsNullOrEmpty(searchParams.Search) || x.ManagerEmail.ToLower().Contains(searchParams.Search.ToLower()) || x.Description.ToLower().Contains(searchParams.Search.ToLower())))
-                        .ToListAsync();
-
-                    foreach (var record in supplierReturnLog)
-                    {
-                        auditTrail.Add(new AuditTrailVM
-                        {
-                            User = record.ManagerEmail,
-                            Type = AuditTypeVM.SupplierReturn.ToString(),
-                            Date = record.Date,
-                            Amount = record.Total,
-                            Quantity = record.ReturnItems.Sum(x => x.Quantity),
-                        });
-                    }
-                    break;
-                case "Write Off":
-                    var writeOffsLog = await _context.WriteOffs
-                        .Include(x => x.Product)
-                        .ThenInclude(x => x.PriceHistory)
-                        .Where(x => (string.IsNullOrEmpty(searchParams.Search) || x.ManagerEmail.ToLower().Contains(searchParams.Search.ToLower())))
-                        .ToListAsync();
-
-                    foreach (var record in writeOffsLog)
-                    {
-                        auditTrail.Add(new AuditTrailVM
-                        {
-                            User = record.ManagerEmail,
-                            Type = AuditTypeVM.WriteOff.ToString(),
-                            Date = record.Date,
-                            Amount = record.Product.GetPrice() * record.Quantity,
+                            TransactionDate = record.TransactionDate,
+                            Amount = record.Amount,
                             Quantity = record.Quantity,
                         });
                     }
                     break;
-                default:
-                    var saleOrder = await _context.Orders
-                        .Include(x => x.OrderItems)
-                        .Include(x => x.DeliveryMethod)
-                        .Where(x => (string.IsNullOrEmpty(searchParams.Search) || x.CustomerEmail.ToLower().Contains(searchParams.Search.ToLower())))
-                        .ToListAsync();
 
-                    foreach (var record in saleOrder)
+                case "Supplier Order":
+                    var supplierOrdersSP = _context.SupplierOrderCombinedView
+                        .FromSqlRaw("EXEC GetSupplierOrdersBySearch @Search", new SqlParameter("@Search", searchParams.Search))
+                        .ToList();
+                    foreach (var record in supplierOrdersSP)
+                    {
+                        auditTrail.Add(record);
+                    }
+                    break;
+
+                case "Sale Return":
+                    var saleReturnLogSP = await _context.SalesReturnsView
+                        .FromSqlRaw("EXEC GetCustomerReturnsBySearch @Search", new SqlParameter("@Search", searchParams.Search))
+                        .ToListAsync();
+                    foreach (var record in saleReturnLogSP)
                     {
                         auditTrail.Add(new AuditTrailVM
                         {
-                            User = record.CustomerEmail,
+                            Email = record.Email,
+                            Type = AuditTypeVM.SaleReturn.ToString(),
+                            TransactionDate = record.TransactionDate,
+                            Amount = record.Amount,
+                            Quantity = record.Quantity,
+                        });
+                    }
+                    break;
+
+                case "Supplier Return":
+                    var supplierReturnLogSP = await _context.SupplierReturnsView
+                        .FromSqlRaw("EXEC GetSupplierReturnsBySearch @Search", new SqlParameter("@Search", searchParams.Search))
+                        .ToListAsync();
+                    foreach (var record in supplierReturnLogSP)
+                    {
+                        auditTrail.Add(new AuditTrailVM
+                        {
+                            Email = record.Email,
+                            Type = AuditTypeVM.SupplierReturn.ToString(),
+                            TransactionDate = record.TransactionDate,
+                            Amount = record.Amount,
+                            Quantity = record.Quantity,
+                        });
+                    }
+                    break;
+
+                case "Write Off":
+                    var writeOffsLogSP = await _context.WriteOffsView
+                        .FromSqlRaw("EXEC GetWriteOffsBySearch @Search", new SqlParameter("@Search", searchParams.Search))
+                        .ToListAsync();
+                    foreach (var record in writeOffsLogSP)
+                    {
+                        auditTrail.Add(new AuditTrailVM
+                        {
+                            Email = record.Email,
+                            Type = AuditTypeVM.WriteOff.ToString(),
+                            TransactionDate = record.TransactionDate,
+                            Amount = record.Amount,
+                            Quantity = record.Quantity,
+                        });
+                    }
+                    break;
+
+                default:
+                    var DefaultSP = _context.SalesOrderView
+                       .FromSqlRaw("EXEC GetOrdersBySearch @Search", new SqlParameter("@Search", searchParams.Search))
+                       .ToList();
+                    foreach (var record in DefaultSP)
+                    {
+                        auditTrail.Add(new AuditTrailVM
+                        {
+                            Email = record.Email,
                             Type = AuditTypeVM.SaleOrder.ToString(),
-                            Date = record.OrderDate,
-                            Amount = record.GetTotal(),
-                            Quantity = record.OrderItems.Sum(x => x.Quantity),
+                            TransactionDate = record.TransactionDate,
+                            Amount = record.Amount,
+                            Quantity = record.Quantity,
                         });
                     }
                     break;
             }
-
 
             switch (searchParams.sort)
             {
@@ -149,13 +137,13 @@ namespace Acacia_Back_End.Infrastructure.Data
                     auditTrail = auditTrail.OrderByDescending(x => x.Quantity).ToList();
                     break;
                 case "dateAsc":
-                    auditTrail = auditTrail.OrderBy(x => x.Date).ToList();
+                    auditTrail = auditTrail.OrderBy(x => x.TransactionDate).ToList();
                     break;
                 case "dateDesc":
-                    auditTrail = auditTrail.OrderByDescending(x => x.Date).ToList();
+                    auditTrail = auditTrail.OrderByDescending(x => x.TransactionDate).ToList();
                     break;
                 default:
-                    auditTrail = auditTrail.OrderByDescending(x => x.Date).ToList();
+                    auditTrail = auditTrail.OrderByDescending(x => x.TransactionDate).ToList();
                     break;
             }
             return auditTrail;
