@@ -1,6 +1,6 @@
 ﻿namespace Acacia_Back_End.Core.ViewModels
 {
-    public class AuditTrailVM
+    public class WriteOffAuditVM
     {
         public string Email { get; set; }
         public DateTime TransactionDate { get; set; }
