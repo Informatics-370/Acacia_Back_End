@@ -33,6 +33,7 @@ namespace Acacia_Back_End.Extensions
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IReportService, ReportService>();
+            services.AddScoped<IAuditRepository, AuditRepository>();
             services.AddScoped(typeof(IGenericRepository<>), (typeof(GenericRepository<>)));
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.Configure<ApiBehaviorOptions>(options =>
