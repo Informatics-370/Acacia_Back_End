@@ -33,6 +33,7 @@ namespace Acacia_Back_End.Core.Interfaces
         //Products
         Task<IReadOnlyList<Product>> GetProductsAsync(ProductSpecParams pageParams);
         Task<Product> GetProductByIdAsync(int id);
+        Task<List<Product>> VerifyProductList(List<Product> products);
 
         //GiftBoxes
         Task<IReadOnlyList<GiftBox>> GetGiftBoxesAsync(SpecParams specParams);
@@ -111,5 +112,6 @@ namespace Acacia_Back_End.Core.Interfaces
         Task<bool> RemoveGiftBox(int id);
         Task<bool> RemoveDeliveryMethod(int id);
         Task<bool> UpdateDeliveryMethod(DeliveryMethod deliveryMethod);
+
     }
 }

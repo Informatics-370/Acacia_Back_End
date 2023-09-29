@@ -61,7 +61,7 @@ namespace Acacia_Back_End.Controllers
             }
             else
             {
-                imageUrl = "images/products/default.jpg";
+                imageUrl = "images/giftboxes/default.jpg";
             }
            
             var newgiftbox = new GiftBox
