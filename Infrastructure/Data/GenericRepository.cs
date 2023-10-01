@@ -410,7 +410,7 @@ namespace Acacia_Back_End.Infrastructure.Data
                 var product = await this.GetProductByIdAsync(item.ItemOrdered.ProductItemId);
                 if (product != null && product.Quantity <= product.TresholdValue)
                 {
-                    var result4 = CreateAutomatedSupplierOrderAsync("mzamotembe7@gmail.com", product);
+                    var result4 = await CreateAutomatedSupplierOrderAsync("mzamotembe7@gmail.com", product);
                 }
             }
 
@@ -486,7 +486,7 @@ namespace Acacia_Back_End.Infrastructure.Data
 
         public async Task<bool> CreateWriteOff(WriteOff wrtieoff)
         {
-            var product = await _context.Products.Where(x => x.Id == wrtieoff.ProductId).Include(x => x.Supplier).Include(x => x.PriceHistory).FirstOrDefaultAsync();
+            var product = await _context.Products.Where(x => x.Id == wrtieoff.ProductId).Include(x => x.Supplier).Include(x => x.PriceHistory).FirstOrDefaultAsync();  
             if (product.Quantity < wrtieoff.Quantity) return false;
             product.Quantity = product.Quantity - wrtieoff.Quantity;
             wrtieoff.ProductPrice = product.GetPrice();
@@ -497,7 +497,7 @@ namespace Acacia_Back_End.Infrastructure.Data
 
             if (product.Quantity <= product.TresholdValue)
             {
-                var result4 = CreateAutomatedSupplierOrderAsync("mzamotembe7@gmail.com", product);
+                var result4 = await CreateAutomatedSupplierOrderAsync("mzamotembe7@gmail.com", product);
             }
             return result3;
         }
@@ -760,6 +760,7 @@ namespace Acacia_Back_End.Infrastructure.Data
             var company = await _context.Company.FirstOrDefaultAsync();
             var order = new SupplierOrder(items, managerEmail, company, product.Supplier, total);
             order.Status = SupplierOrderStatus.Pending;
+            order.TotalNotDelivered = 0;
 
             await _context.SupplierOrders.AddAsync(order);
 
@@ -925,7 +926,7 @@ namespace Acacia_Back_End.Infrastructure.Data
                 var product = await this.GetProductByIdAsync(item.ProductId);
                 if (product.Quantity <= product.TresholdValue)
                 {
-                    var result4 = CreateAutomatedSupplierOrderAsync("mzamotembe7@gmail.com", product);
+                    var result4 = await CreateAutomatedSupplierOrderAsync("mzamotembe7@gmail.com", product);
                 }
             }
 

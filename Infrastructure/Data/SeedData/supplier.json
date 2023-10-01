@@ -1,17 +1,17 @@
 [
   {
-    "Name": "Gucci",
-    "Email": "gucci@gmail.com",
+    "Name": "Supplier 1",
+    "Email": "supplier1@gmail.com",
     "PhoneNumber": 799912889
   },
   {
-    "Name": "Balenciaga",
-    "Email": "balenciaga@gmail.com",
+    "Name": "Supplier 2",
+    "Email": "supplier2@gmail.com",
     "PhoneNumber": 799912889
   },
   {
-    "Name": "YourMom",
-    "Email": "momma@gmail.com",
+    "Name": "Supplier 3",
+    "Email": "supplier3@gmail.com",
     "PhoneNumber": 799912889
   }
 ]
