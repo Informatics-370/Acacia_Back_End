@@ -61,7 +61,7 @@ namespace Acacia_Back_End.Controllers
             {
                 case "Damaged":
                     status = WriteOffReason.Damaged;
-                break;
+                    break;
                 case "Theft":
                     status = WriteOffReason.Theft;
                     break;
@@ -90,6 +90,7 @@ namespace Acacia_Back_End.Controllers
             if (result == true) return Ok();
             return BadRequest(new ApiResponse(400));
         }
+
 
         [HttpPost("LogReturn")]
         public async Task<ActionResult> LogReturn(LogCustomerReturnVM customerReturn)
